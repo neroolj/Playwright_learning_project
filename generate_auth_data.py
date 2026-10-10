@@ -19,7 +19,11 @@ def generate_test_auth_data(browser: Browser) -> None:
     context.storage_state(path='test_state.json')
     context.close()
 
-with sync_playwright() as playwright:
-    browser = playwright.chromium.launch()
-    generate_test_auth_data(browser)
-    browser.close()
+def main():
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        generate_test_auth_data(browser)
+        browser.close()
+
+if __name__ == "__main__":
+    main()
