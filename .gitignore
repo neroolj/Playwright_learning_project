@@ -13,3 +13,4 @@ dist/
 .coverage
 .env
 .auth_states
+test-results
