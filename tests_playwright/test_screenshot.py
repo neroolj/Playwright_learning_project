@@ -30,7 +30,7 @@ def test_homepage_visual(page: Page, assert_snapshot) -> None:
     screenshot = page.screenshot()
     assert_snapshot(screenshot, path)
 
-
+@pytest.mark.skip('To be finished later')
 def test_cart_button_visual(page: Page) -> None:
     path = 'screenshots/demoblaze/cart_button.png'
 

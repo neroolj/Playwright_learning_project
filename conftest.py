@@ -9,7 +9,7 @@ from pages.product_page import ProductPage
 load_dotenv()
 ZOOPLUS_USERNAME = os.getenv('USERNAME')
 ZOOPLUS_PASSWORD = os.getenv('PASSWORD')
-STATE_FILE = "test_state.json"
+STATE_FILE = ".auth_states/test_state.json"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -53,7 +53,7 @@ def auth_context_zooplus(browser: Browser):
     page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
     page.get_by_role("button", name="Logga in").click()
     page.get_by_test_id('balance-points-header-component').first.wait_for()
-    context.storage_state(path='zooplus_state2.json')
+    context.storage_state(path='.auth_states/zooplus_state.json')
     yield context
     context.close()
 
@@ -68,7 +68,7 @@ def auth_page_zooplus(auth_context_zooplus : BrowserContext):
 @pytest.fixture()
 def auth_page_test(browser: Browser):
     """Fixture creates page using logged on state from "test_state.json" file """
-    context = browser.new_context(storage_state="test_state.json")
+    context = browser.new_context(storage_state=".auth_states/test_state.json")
     page = context.new_page()
     page.goto('https://demoblaze.com/')
     yield page
