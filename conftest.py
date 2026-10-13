@@ -1,4 +1,5 @@
 import pytest
+import allure
 import os
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
@@ -83,3 +84,28 @@ def product_page(page: Page) -> ProductPage:
     """Fixture creates ProductPage"""
     item = ProductPage(page)
     return item
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """This hook collects screenshot and attach it to Allure report if test failed"""""
+
+    # save test result which is sent by Pytest via generator.send() method
+    outcome = yield
+
+    # extract result
+    report = outcome.get_result()
+
+    # check if we are on executing stage and test failed
+    if report.when == "call" and report.failed:
+
+        # save current page element depending on which fixture is used
+        page = item.funcargs.get('page') or item.funcargs.get('auth_page_test') or item.funcargs.get('auth_page_zooplus')
+
+        # if page exists collect screenshot and attach it to Allure report
+        if page:
+            allure.attach(
+                page.screenshot(full_page=True),
+                name="Screenshot",
+                attachment_type=allure.attachment_type.PNG
+            )
