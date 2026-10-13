@@ -11,10 +11,13 @@ ZOOPLUS_USERNAME = os.getenv('USERNAME')
 ZOOPLUS_PASSWORD = os.getenv('PASSWORD')
 STATE_FILE = ".auth_states/test_state.json"
 
-
 @pytest.fixture(scope="session", autouse=True)
 def generate_auth_state_demoblaze():
     """Fixture to create test_state.json for demoblaze.com"""
+    # Create folder if it doesn't exist
+    if not os.path.exists('.auth_states'):
+        os.mkdir('.auth_states')
+
     # Create file only if it doesn't exist
     if not os.path.exists(STATE_FILE):
         test_user = os.getenv("TEST_USER")
