@@ -23,5 +23,5 @@ def test_count2(page: Page) -> None:
     page.get_by_placeholder('логин').fill(login)
     page.get_by_placeholder('пароль').fill(password)
     page.get_by_text('Войти').click()
-    page.screenshot(path="screenshots/count2.png")
+    page.screenshot(path="test-results/screenshots/count2.png")
     expect(page.locator('[data-testid="product-item"]')).to_have_count(2)
