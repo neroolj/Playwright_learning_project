@@ -16,6 +16,8 @@ This is a Playwright test project using pytest for automated web testing.
 
 - Python 3.8 or higher
 - Node.js (for Playwright browser installation)
+- Allure
+- Java
 
 ### Setup
 
@@ -85,5 +87,6 @@ This project requires the following dependencies:
 - playwright
 - pytest-playwright
 - python-dotenv
+- allure-pytest
 
 The package will automatically install these when you run `pip install -e .`

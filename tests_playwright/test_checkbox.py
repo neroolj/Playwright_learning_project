@@ -1,6 +1,7 @@
+import allure
 from playwright.sync_api import Page, expect
 
-
+@allure.epic("Basic examples")
 def test_checkbox(page: Page) -> None:
     page.goto("https://the-internet.herokuapp.com/checkboxes")
     # Find all <input> elements inside "checkboxes"

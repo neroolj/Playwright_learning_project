@@ -14,3 +14,4 @@ dist/
 .env
 .auth_states
 test-results
+allure

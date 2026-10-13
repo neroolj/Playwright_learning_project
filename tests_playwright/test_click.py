@@ -1,7 +1,9 @@
+import allure
 import re
 from playwright.sync_api import expect, Page
 
 
+@allure.epic("Basic examples")
 def test_default_button_state(page: Page) -> None:
     """Test default state of button"""
     page.goto('http://uitestingplayground.com/click')
@@ -9,6 +11,7 @@ def test_default_button_state(page: Page) -> None:
     expect(button).to_have_class(re.compile(r".*primary"))
 
 
+@allure.epic("Basic examples")
 def test_click(page: Page) -> None:
     """Test changing state after click"""
     # go to specified page
@@ -20,6 +23,8 @@ def test_click(page: Page) -> None:
     # check if class corresponds to specified regexp
     expect(button).to_have_class(re.compile(r".*success"))
 
+
+@allure.epic("Basic examples")
 def test_checkbox_and_radio(page):
     """To be added"""
     # go to page

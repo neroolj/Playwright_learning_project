@@ -1,6 +1,8 @@
-import pytest
+import allure
 from playwright.sync_api import Page, expect
 
+
+@allure.epic("Basic examples")
 def test_mock_api_response(page: Page):
     #Intercept the API call and return a mock response
     page.route("https://www.zooplus.se/protected/api/loyalty-management/bonus-points/customer/balance", lambda route: route.fulfill(

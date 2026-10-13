@@ -1,10 +1,11 @@
 from playwright.sync_api import Page, expect
 import pytest
+import allure
 
 def url(c: int) -> str:
     return f"https://www.ebay.com/sch/i.html?_nkw=nike&_ipg={c}"
 
-
+@allure.epic("Basic examples")
 @pytest.mark.skip(reason='Work normally only in headed mode')
 def test_check_elements_count(page: Page):
     # Первая проверка для 120 элементов
@@ -15,6 +16,7 @@ def test_check_elements_count(page: Page):
     page.goto(url(240))
     expect(page.locator("li.su-media-carousel")).to_have_count(240)
 
+@allure.epic("Basic examples")
 def test_count2(page: Page) -> None:
     login = 'tester@inzhenerka.tech'
     password = 'LetsTest!'

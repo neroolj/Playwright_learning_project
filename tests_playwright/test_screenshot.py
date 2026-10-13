@@ -1,8 +1,9 @@
 import os.path
 import pytest
 from playwright.sync_api import Page, expect
+import allure
 
-
+@allure.epic("Basic examples")
 @pytest.mark.skip('Just an example')
 def test_screenshot(page: Page):
     """Example of saving screenshots."""
@@ -17,7 +18,7 @@ def test_screenshot(page: Page):
     assert os.path.exists("screenshots/body.png")
     assert os.path.exists("screenshots/last.png")
 
-
+@allure.epic("Basic examples")
 def test_homepage_visual(page: Page, assert_snapshot) -> None:
     path = 'screenshots/demoblaze/homepage.png'
 
@@ -30,6 +31,7 @@ def test_homepage_visual(page: Page, assert_snapshot) -> None:
     screenshot = page.screenshot()
     assert_snapshot(screenshot, path)
 
+@allure.epic("Basic examples")
 @pytest.mark.skip('To be finished later')
 def test_cart_button_visual(page: Page) -> None:
     path = 'screenshots/demoblaze/cart_button.png'

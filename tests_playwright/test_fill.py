@@ -1,7 +1,9 @@
 import pytest
 from playwright.sync_api import Page, expect
+import allure
 
 
+@allure.epic("Basic examples")
 @pytest.mark.parametrize('login, password, result',
                          [('User1', 'pwd', 'Welcome, User1!'),
                           ('User2', 'dpw', 'Invalid username/password')]
@@ -24,6 +26,7 @@ def test_auth(page: Page, login: str, password: str, result: str) -> None:
     expect(status).to_have_text(result)
 
 
+@allure.epic("Basic examples")
 @pytest.mark.parametrize('device',
                          ['iPhone 17 Pro landscape',
                           'Pixel 10 Pro XL',

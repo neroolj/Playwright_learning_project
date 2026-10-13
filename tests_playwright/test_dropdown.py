@@ -1,7 +1,8 @@
 from playwright.sync_api import Page, expect
 import re
+import allure
 
-
+@allure.epic("Basic examples")
 def test_dropdown(page: Page) -> None:
     """Example of using .select_option() method"""
     page.goto('https://the-internet.herokuapp.com/dropdown')
