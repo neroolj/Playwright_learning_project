@@ -72,10 +72,10 @@ pytest --tracing=retain-on-failure
 
 ## Project Structure
 
-- `tests_playwright/` - Playwright tests
-- `tests_zooplus/` - Zooplus specific tests  
+- `tests/tests_playwright/` - Playwright tests
+- `tests/tests_zooplus/` - Zooplus specific tests  
 - `pages/` - Page Object Model classes
-- `conftest.py` - Pytest fixtures and configuration
+- `tests/conftest.py` - Pytest fixtures and configuration
 - `generate_auth_data.py` - Script to generate authentication state files
 - `.env` - Environment variables (not committed to git)
 

@@ -15,14 +15,14 @@
 - `.gitignore` - Git ignore rules
 
 ### Core Components:
-- `conftest.py` - Pytest fixtures and configuration
+- `tests/conftest.py` - Pytest fixtures and configuration
 - `generate_auth_data.py` - Script to generate authentication state files
 - `pages/product_page.py` - Page Object Model implementation
-- `POM_example.py` - Example of Page Object Model usage
+- `tests/POM_example.py` - Example of Page Object Model usage
 
 ### Test Suites:
-- `tests_playwright/` - Playwright tests
-- `tests_zooplus/` - Zooplus specific tests
+- `tests/tests_playwright/` - Playwright tests
+- `tests/tests_zooplus/` - Zooplus specific tests
 
 ## Installation
 

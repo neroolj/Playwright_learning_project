@@ -10,14 +10,14 @@ from pages.product_page import ProductPage
 load_dotenv()
 ZOOPLUS_USERNAME = os.getenv('USERNAME')
 ZOOPLUS_PASSWORD = os.getenv('PASSWORD')
-STATE_FILE = ".auth_states/test_state.json"
+STATE_FILE = "../.auth_states/test_state.json"
 
 @pytest.fixture(scope="session", autouse=True)
 def generate_auth_state_demoblaze():
     """Fixture to create test_state.json for demoblaze.com"""
     # Create folder if it doesn't exist
-    if not os.path.exists('.auth_states'):
-        os.mkdir('.auth_states')
+    if not os.path.exists('../.auth_states'):
+        os.mkdir('../.auth_states')
 
     # Create file only if it doesn't exist
     if not os.path.exists(STATE_FILE):
@@ -57,7 +57,7 @@ def auth_context_zooplus(browser: Browser):
     page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
     page.get_by_role("button", name="Logga in").click()
     page.get_by_test_id('balance-points-header-component').first.wait_for()
-    context.storage_state(path='.auth_states/zooplus_state.json')
+    context.storage_state(path='../.auth_states/zooplus_state.json')
     yield context
     context.close()
 

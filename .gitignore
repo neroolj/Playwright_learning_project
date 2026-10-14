@@ -13,5 +13,5 @@ dist/
 .coverage
 .env
 .auth_states
-test-results
+tests/test-results
 allure
