@@ -36,6 +36,18 @@ jobs:
           TEST_PASS: ${{ secrets.TEST_PASS }}
         run: pytest tests/tests_zooplus/ --alluredir=allure-results
 
+      - name: Install Allure CLI
+        run: |
+          ALLURE_VERSION=2.22.0
+          wget -qO /tmp/allure.zip \
+            https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.zip
+          unzip -qq /tmp/allure.zip -d /opt/
+          echo "/opt/allure-${ALLURE_VERSION}/bin" >> $GITHUB_PATH
+
+      - name: Verify Allure
+        id: allure
+        run: allure --version
+
       - name: Generate allure report
         if: always()
         run: allure generate allure-results -o allure-report --clean
