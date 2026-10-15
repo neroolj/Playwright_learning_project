@@ -9,7 +9,6 @@ def test_empty_cart(page: Page) -> None:
         page.get_by_role("button", name="Endast nödvändiga kakor").click()
     with allure.step('Click on shopping cart button'):
         page.locator('#header-cart-nav-anchor').click()
-        #page.get_by_role("link", name="Varukorg").click()
     with allure.step('Check empty cart page'):
         expect(page.get_by_role("heading", name="Varukorgen är tom")).to_be_visible()
         expect(page.get_by_text("Lägg till något i varukorgen!")).to_be_visible()
