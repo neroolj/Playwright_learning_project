@@ -10,7 +10,10 @@ from pages.product_page import ProductPage
 load_dotenv()
 ZOOPLUS_USERNAME = os.getenv('USERNAME')
 ZOOPLUS_PASSWORD = os.getenv('PASSWORD')
+
+# define location of auth_data
 STATE_FILE = "../.auth_states/test_state.json"
+
 
 @pytest.fixture(scope="session", autouse=True)
 def generate_auth_state_demoblaze():
@@ -47,7 +50,7 @@ def generate_auth_state_demoblaze():
 
 @pytest.fixture(scope="session")
 def auth_context_zooplus(browser: Browser):
-    """Login fixture for zooplus.se"""
+    """Fixture creates logged in context for zooplus"""
     context = browser.new_context()
     page = context.new_page()
     page.goto("https://www.zooplus.se/")
@@ -64,10 +67,11 @@ def auth_context_zooplus(browser: Browser):
 
 @pytest.fixture()
 def auth_page_zooplus(auth_context_zooplus : BrowserContext):
-    """Fixture to create page based on logged in context"""
+    """Fixture creates page based on logged in context"""
     page = auth_context_zooplus.new_page()
     yield page
     page.close()
+
 
 @pytest.fixture()
 def auth_page_test(browser: Browser):
@@ -90,7 +94,7 @@ def product_page(page: Page) -> ProductPage:
 def pytest_runtest_makereport(item, call):
     """This hook collects screenshot and attach it to Allure report if test failed"""""
 
-    # save test result which is sent by Pytest via generator.send() method
+    # save test result which is sent by Pytest via .send() method
     outcome = yield
 
     # extract result
@@ -109,3 +113,23 @@ def pytest_runtest_makereport(item, call):
                 name="Screenshot",
                 attachment_type=allure.attachment_type.PNG
             )
+
+
+@pytest.fixture()
+def mock_backend_error():
+    """Fixture captures API requests and mocks response with error code"""
+    # list of supported codes
+    error_codes = {400: 'Bad request',
+                   401: 'Unauthorized',
+                   403: 'Forbidden',
+                   404: 'Page not found',
+                   500: 'Internal server error',
+                   503: 'Service unavailable',
+                   504: 'Gateway timeout',}
+    # nested function where response replacement logig is implemented
+    def _mock(page: Page, api: str, status_code: int):
+        page.route(api, lambda route: route.fulfill(
+            status=status_code,
+            json={"errorMessage": error_codes.get(status_code, 'Unknown error')})
+                   )
+    return _mock
