@@ -43,6 +43,14 @@ pip install -e .
 playwright install
 ```
 
+5. Install Allure and Java
+```Windows
+winget install EclipseAdoptium.Temurin.21.JDK
+winget install --id QametaSoftware.Allure -e
+
+Mac
+To be added
+```
 5. Set up environment variables by creating a `.env` file with your credentials:
 ```bash
 USERNAME=your_email@example.com

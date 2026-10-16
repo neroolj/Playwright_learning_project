@@ -17,5 +17,5 @@ def test_my_account(auth_page_zooplus: Page) -> None:
         expect(auth_page_zooplus.get_by_text('Hej')).to_have_text('Hej Oleh')
 
     with allure.step('Check that log out link is displayed'):
-        link = auth_page_zooplus.get_by_text('Logga ut')
+        link = auth_page_zooplus.get_by_role("link", name="Logga ut")
         expect(link).to_have_attribute('aria-disabled', 'false')

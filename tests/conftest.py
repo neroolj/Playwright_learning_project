@@ -8,19 +8,20 @@ from pages.product_page import ProductPage
 
 # Load variables from .env
 load_dotenv()
-ZOOPLUS_USERNAME = os.getenv('USERNAME')
-ZOOPLUS_PASSWORD = os.getenv('PASSWORD')
+ZOOPLUS_USERNAME = os.getenv('ZOOPLUS_USERNAME')
+ZOOPLUS_PASSWORD = os.getenv('ZOOPLUS_PASSWORD')
 
 # define location of auth_data
-STATE_FILE = "../.auth_states/test_state.json"
+STATE_FILE = ".auth_states/test_state.json"
+STATE_FOLDER = STATE_FILE.split("/")[0]
 
 
 @pytest.fixture(scope="session", autouse=True)
 def generate_auth_state_demoblaze():
     """Fixture to create test_state.json for demoblaze.com"""
     # Create folder if it doesn't exist
-    if not os.path.exists('../.auth_states'):
-        os.mkdir('../.auth_states')
+    if not os.path.exists(STATE_FOLDER):
+        os.mkdir(STATE_FOLDER)
 
     # Create file only if it doesn't exist
     if not os.path.exists(STATE_FILE):
