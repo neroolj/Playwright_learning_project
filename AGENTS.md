@@ -1,0 +1,84 @@
+
+# Project Instructions
+
+## Project Overview
+
+This project contains browser UI automation tests written in Python
+using Playwright and pytest.
+
+Playwright MCP is configured in Codex for browser exploration.
+Use it to inspect the application when browser interaction is useful.
+
+## Tech Stack
+
+- Python
+- pytest
+- Playwright Python
+- Allure for test reporting, where configured
+- GitHub Actions for CI, where configured
+
+## Project Structure
+
+- `tests/` — automated tests
+- `pages/` — Page Objects
+- `specs/` — test plans and scenarios (for agents only)
+- `tests/conftest.py` — shared pytest fixtures
+- `pytest.ini` — pytest configuration
+
+Check the actual repository structure before relying on these paths.
+
+## Python Guidelines
+
+- Follow PEP 8 and existing project conventions.
+- Use descriptive names for tests, fixtures and variables.
+- Add type hints where they improve clarity and match existing code.
+- Prefer small functions with a single responsibility.
+- Reuse existing helpers and fixtures instead of duplicating setup.
+- Do not add dependencies without explaining why they are needed.
+
+
+## Playwright Guidelines
+
+- Follow the existing sync or async API style. Do not mix them.
+- Prioritize role, label and test ID locators over CSS/XPATH where possible.
+- Avoid brittle CSS selectors and generated class names when stable
+  alternatives exist.
+- Use Playwright's auto-waiting and expect assertions.
+- Avoid fixed sleeps such as `time.sleep()` and `page.wait_for_timeout()`
+  unless there is a justified reason. When it happens add comment in code why it needed there.
+- Reuse existing authentication and browser fixtures.
+- Do not hardcode credentials, tokens or other secrets.
+- Use Page Object Model for designing tests
+
+## Test Design
+
+- Each test should verify a clearly defined behavior.
+- Prefer independent, deterministic tests.
+- Cover positive, negative and relevant boundary scenarios.
+- Keep test data and cleanup explicit.
+- Do not weaken assertions merely to make a test pass.
+- Do not skip tests to hide failures.
+- Make tests Allure-ready
+- - Add Allure markers for tests such as @allure.epic and @allure.severity
+- - Write tests with allure steps such as "with allure.step('Step description'):"
+
+
+## Workflow
+
+Before changing code:
+1. Inspect relevant tests, fixtures and configuration.
+2. Understand the existing conventions.
+3. Identify the smallest change that solves the problem.
+
+After changing code:
+1. Run the relevant pytest tests when possible.
+2. Review the results and investigate failures.
+3. Report changed files and the verification performed.
+4. Never claim tests passed unless they were actually executed.
+
+## Safety and Scope
+
+- Do not modify production data.
+- Do not perform destructive actions without explicit approval.
+- Do not modify application code when the task is limited to test code.
+- Ask before making broad architectural changes.
