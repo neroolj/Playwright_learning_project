@@ -61,7 +61,6 @@ def auth_context_zooplus(browser: Browser):
     page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
     page.get_by_role("button", name="Logga in").click()
     page.get_by_test_id('balance-points-header-component').first.wait_for()
-    context.storage_state(path='../.auth_states/zooplus_state.json')
     yield context
     context.close()
 
