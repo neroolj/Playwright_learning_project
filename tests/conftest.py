@@ -57,26 +57,8 @@ def auth_context_zooplus(browser: Browser):
     page.goto("https://www.zooplus.se/")
     page.get_by_role("button", name="Endast nödvändiga kakor").click()
     page.get_by_role("button", name="Meny för mitt zooplus").click()
-
-    # temporary debug code
-    email = page.get_by_role('textbox', name="E-postadress")
-    password = page.get_by_role("textbox", name="Lösenord")
-    email.fill(ZOOPLUS_USERNAME)
-    password.fill(ZOOPLUS_PASSWORD)
-    login_button = page.get_by_role("button", name="Logga in")
-    print('\n\n-------DIAGNOSTIC INFORMATION-------')
-    print(f'Email field found?: {email.count()}')
-    print(f'Password field found?: {password.count()}')
-    print(f'Login button found?: {login_button.count()}')
-    print("Email length:", len(email.input_value()))
-    print("Password length:", len(password.input_value()))
-    print(f'Login = {ZOOPLUS_USERNAME}')
-    p_hidden = "".join([s if idx % 2 == 0 else '*' for idx, s in enumerate(ZOOPLUS_USERNAME)])
-    print(f'Password = {p_hidden}')
-    print('-------DIAGNOSTIC INFORMATION-------\n\n')
-
-    # page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
-    # page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
+    page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
+    page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
     page.get_by_role("button", name="Logga in").click()
     page.get_by_test_id('balance-points-header-component').first.wait_for()
     yield context

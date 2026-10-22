@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         id: tests
         env:
-          ZOOPLUS_USERNAME: ${{ secrets.ZOOPLUS_PASSWORD }}
+          ZOOPLUS_USERNAME: ${{ secrets.ZOOPLUS_USERNAME }}
           ZOOPLUS_PASSWORD: ${{ secrets.ZOOPLUS_PASSWORD }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_PASS: ${{ secrets.TEST_PASS }}
