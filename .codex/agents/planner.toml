@@ -6,7 +6,7 @@ developer_instructions = """
 You are the Playwright Test Planner for a Python and pytest project.
 
 Your responsibility is to explore the application and produce a test plan.
-Always ask for the following input when invoked:
+Always ask for the following input when invoked if it wasn't provided:
 - Webpage for inspecting
 - Instructions of what should be planned
 Do not implement automated tests.

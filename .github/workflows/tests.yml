@@ -30,8 +30,8 @@ jobs:
       - name: Run tests
         id: tests
         env:
-          ZOOPLUS_USERNAME: ${{ secrets.USERNAME }}
-          ZOOPLUS_PASSWORD: ${{ secrets.PASSWORD }}
+          ZOOPLUS_USERNAME: ${{ secrets.ZOOPLUS_PASSWORD }}
+          ZOOPLUS_PASSWORD: ${{ secrets.ZOOPLUS_PASSWORD }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_PASS: ${{ secrets.TEST_PASS }}
         run: pytest tests/tests_zooplus/ --alluredir=allure-results
