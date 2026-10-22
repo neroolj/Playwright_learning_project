@@ -72,7 +72,7 @@ def auth_context_zooplus(browser: Browser):
     print("Password length:", len(password.input_value()))
     print(f'Login = {ZOOPLUS_USERNAME}')
     p_hidden = ZOOPLUS_PASSWORD
-    for s, idx in enumerate(p_hidden):
+    for idx, s in enumerate(p_hidden):
         if idx // 2 == 0:
             p_hidden[idx] = '*'
 
