@@ -60,6 +60,16 @@ def auth_context_zooplus(browser: Browser):
     page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
     page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
     page.get_by_role("button", name="Logga in").click()
+    print(f'\n\nDIAGNOSTIC INFORMATION\nThis is user name: {ZOOPLUS_USERNAME}')
+    print("Current URL:", page.url)
+    print("Page title:", page.title())
+    print(
+        "Account element count:",
+        page.get_by_test_id("balance-points-header-component").count(),
+    )
+    print("Visible page text:", page.locator("body").inner_text()[:3000])
+    print('\n\n')
+
     page.get_by_test_id('balance-points-header-component').first.wait_for()
     yield context
     context.close()

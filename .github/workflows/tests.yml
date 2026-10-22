@@ -34,7 +34,7 @@ jobs:
           ZOOPLUS_PASSWORD: ${{ secrets.ZOOPLUS_PASSWORD }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_PASS: ${{ secrets.TEST_PASS }}
-        run: pytest tests/tests_zooplus/ --alluredir=allure-results
+        run: pytest tests/tests_zooplus/ --alluredir=allure-results -s
 
       - name: Install Allure CLI
         run: |
