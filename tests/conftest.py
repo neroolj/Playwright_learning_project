@@ -56,42 +56,25 @@ def auth_context_zooplus(browser: Browser):
     page = context.new_page()
     page.goto("https://www.zooplus.se/")
     page.get_by_role("button", name="Endast nödvändiga kakor").click()
+    page.get_by_role("button", name="Meny för mitt zooplus").click()
 
-    email = page.get_by_role("textbox", name="E-postadress")
+    # temporary debug code
+    email = page.get_by_role('textbox', name="E-postadress")
     password = page.get_by_role("textbox", name="Lösenord")
+    email.fill(ZOOPLUS_USERNAME)
+    password.fill(ZOOPLUS_PASSWORD)
     login_button = page.get_by_role("button", name="Logga in")
-
-    print("Username configured:", bool(ZOOPLUS_USERNAME))
-    print("Password configured:", bool(ZOOPLUS_PASSWORD))
-
-    email.fill(ZOOPLUS_USERNAME or "")
-    password.fill(ZOOPLUS_PASSWORD or "")
-
-    # Не выводим сами значения — только длину и состояние полей.
+    print('\n\n-------DIAGNOSTIC INFORMATION-------')
+    print(f'Email field found?: {email.count()}')
+    print(f'Password field found?: {password.count()}')
+    print(f'Login button found?: {login_button.count()}')
     print("Email length:", len(email.input_value()))
     print("Password length:", len(password.input_value()))
+    print('-------DIAGNOSTIC INFORMATION-------\n\n')
 
-    for name, locator in [("email", email), ("password", password)]:
-        state = locator.evaluate(
-            """el => ({
-                valid: el.validity.valid,
-                validationMessage: el.validationMessage,
-                required: el.required
-            })"""
-        )
-        print(f"{name} field state:", state)
-
-    login_button.click()
-    page.wait_for_timeout(2000)
-
-    print("URL after login click:", page.url)
-    print("Page text after login click:")
-    print(page.locator("body").inner_text()[:3000])
-
-    # page.get_by_role("button", name="Meny för mitt zooplus").click()
     # page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
     # page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
-    # page.get_by_role("button", name="Logga in").click()
+    page.get_by_role("button", name="Logga in").click()
     page.get_by_test_id('balance-points-header-component').first.wait_for()
     yield context
     context.close()
