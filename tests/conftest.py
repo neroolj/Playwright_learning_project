@@ -77,6 +77,7 @@ def auth_context_zooplus(browser: Browser):
             p_hidden[idx] = '*'
 
     print(f'Password = {p_hidden}')
+
     print('-------DIAGNOSTIC INFORMATION-------\n\n')
 
     # page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
