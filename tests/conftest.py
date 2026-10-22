@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
 from pages.product_page import ProductPage
+from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
 
 
 # Load variables from .env
@@ -90,11 +91,23 @@ def auth_page_test(browser: Browser):
     yield page
     page.close()
 
-
+# Pages for Page Object Model approach
 @pytest.fixture()
 def product_page(page: Page) -> ProductPage:
     """Fixture creates ProductPage"""
     item = ProductPage(page)
+    return item
+
+@pytest.fixture()
+def zooplus_homepage_pom(page: Page) -> ZooplusHomePage:
+    """Fixture creates Zooplus HomePage"""
+    item = ZooplusHomePage(page)
+    return item
+
+@pytest.fixture()
+def zooplus_loginpage_pom(page: Page) -> ZooplusLoginPage:
+    """Fixture creates Zooplus LoginPage"""
+    item = ZooplusLoginPage(page)
     return item
 
 
