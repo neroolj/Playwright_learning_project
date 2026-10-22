@@ -71,13 +71,8 @@ def auth_context_zooplus(browser: Browser):
     print("Email length:", len(email.input_value()))
     print("Password length:", len(password.input_value()))
     print(f'Login = {ZOOPLUS_USERNAME}')
-    p_hidden = ZOOPLUS_PASSWORD
-    for idx, s in enumerate(p_hidden):
-        if idx // 2 == 0:
-            p_hidden[idx] = '*'
-
+    p_hidden = "".join([s if idx % 2 == 0 else '*' for idx, s in enumerate(ZOOPLUS_USERNAME)])
     print(f'Password = {p_hidden}')
-
     print('-------DIAGNOSTIC INFORMATION-------\n\n')
 
     # page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
