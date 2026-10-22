@@ -3,10 +3,9 @@ from playwright.sync_api import Page, expect
 
 @allure.epic('Zooplus testing')
 @allure.severity(allure.severity_level.NORMAL)
-def test_empty_cart(page: Page) -> None:
-    with allure.step('Go to home page'):
-        page.goto('https://www.zooplus.se/')
-        page.get_by_role("button", name="Endast nödvändiga kakor").click()
+def test_empty_cart(zooplus_homepage: Page) -> None:
+    """Testing empty cart"""
+    page = zooplus_homepage
     with allure.step('Click on shopping cart button'):
         page.locator('#header-cart-nav-anchor').click()
     with allure.step('Check empty cart page'):
@@ -21,11 +20,9 @@ def test_empty_cart(page: Page) -> None:
 
 @allure.epic('Zooplus testing')
 @allure.severity(allure.severity_level.BLOCKER)
-def test_add_item_to_cart(page: Page) -> None:
+def test_add_item_to_cart(zooplus_homepage: Page) -> None:
     """Testing adding item to cart"""
-    with allure.step('Go to home page'):
-        page.goto('https://www.zooplus.se/')
-        page.get_by_role("button", name="Endast nödvändiga kakor").click()
+    page = zooplus_homepage
     with allure.step('Select first item from suggestions'):
         # select first item from recommendations
         recommendations = page.locator('.RecommendationSliderV2_slider__RAoX2').first

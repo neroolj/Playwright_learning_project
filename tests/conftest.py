@@ -49,6 +49,14 @@ def generate_auth_state_demoblaze():
             browser.close()
 
 
+@pytest.fixture()
+def zooplus_homepage(page: Page):
+    """Fixture creates page with accepted cookies"""
+    page.goto("https://www.zooplus.se/")
+    page.get_by_role("button", name="Endast nödvändiga kakor").click()
+    return page
+
+
 @pytest.fixture(scope="session")
 def auth_context_zooplus(browser: Browser):
     """Fixture creates logged in context for zooplus"""
