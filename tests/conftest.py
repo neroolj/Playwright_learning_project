@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
 from pages.product_page import ProductPage
 from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
+from PIL import Image, ImageChops
 
 
 # Load variables from .env
@@ -15,6 +16,16 @@ ZOOPLUS_PASSWORD = os.getenv('ZOOPLUS_PASSWORD')
 # define location of auth_data
 STATE_FILE = ".auth_states/test_state.json"
 STATE_FOLDER = STATE_FILE.split("/")[0]
+
+
+def pytest_addoption(parser):
+    """Register new CLI for screenshot generation"""
+    parser.addoption(
+        '--gen-screenshots',
+        action='store_true',
+        default=False,
+        help='Generate screenshots for playwright tests'
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -154,3 +165,28 @@ def mock_backend_error():
             json={"errorMessage": error_codes.get(status_code, 'Unknown error')})
                    )
     return _mock
+
+
+@pytest.fixture()
+def compare_images():
+    """Fixture compares two images with specified accuracy"""
+
+    def _compare(img1_path, img2_path, percentage:float|int=95.0) -> bool:
+        img1 = Image.open(img1_path)
+        img2 = Image.open(img2_path)
+
+        if img1.size != img2.size:
+            raise AssertionError(f"Images have different size: Etalon: {img1.size} vs Current: {img2.size}")
+
+        diff = ImageChops.difference(img1, img2)
+        histogram = diff.convert("L").histogram()
+
+        # histogram[0] contains fully matched pixels, so we use this value
+        total_pixels = img1.width * img1.height
+        identical_pixels = histogram[0]
+        diff_pixels = total_pixels - identical_pixels
+
+        diff_percent = (diff_pixels / total_pixels) * 100
+
+        return True if diff_percent <= 100 - percentage else False
+    return _compare
