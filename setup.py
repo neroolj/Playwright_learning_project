@@ -21,7 +21,8 @@ setup(
         "playwright>=1.40.0",
         "pytest-playwright>=0.3.0",
         "python-dotenv>=0.19.0",
-        "allure-pytest>=2.16.2"
+        "allure-pytest>=2.16.2",
+        "pillow>=13.0.0"
     ],
     entry_points={
         "console_scripts": [

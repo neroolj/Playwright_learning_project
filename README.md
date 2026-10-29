@@ -96,5 +96,6 @@ This project requires the following dependencies:
 - pytest-playwright
 - python-dotenv
 - allure-pytest
+- pillow
 
 The package will automatically install these when you run `pip install -e .`

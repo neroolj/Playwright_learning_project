@@ -37,6 +37,7 @@ This will automatically install all dependencies including:
 - playwright>=1.40.0  
 - pytest-playwright>=0.3.0
 - python-dotenv>=0.19.0
+- pillow>=13.0.0
 
 ## Usage
 
