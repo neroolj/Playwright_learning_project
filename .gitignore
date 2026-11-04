@@ -16,3 +16,4 @@ dist/
 test-results
 test/test-results
 allure
+/.playwright-mcp/

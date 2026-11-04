@@ -12,8 +12,6 @@ def test_checkbox(page: Page) -> None:
     # Check first and uncheck second
     cb1.check()
     cb2.uncheck()
-    print(page.viewport_size)
-    print(page.evaluate("navigator.userAgent"))
     # Verify that checkboxes are in the right state
     expect(cb1).to_be_checked()
     expect(cb2).not_to_be_checked()

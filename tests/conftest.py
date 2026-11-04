@@ -1,11 +1,13 @@
 import pytest
 import allure
 import os
+import time
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
 from pages.product_page import ProductPage
 from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
 from PIL import Image, ImageChops
+from rich import print
 
 
 # Load variables from .env
@@ -25,6 +27,11 @@ def pytest_addoption(parser):
         action='store_true',
         default=False,
         help='Generate screenshots for playwright tests'
+    )
+    parser.addoption(
+        '--time',
+        action='store_true',
+        help='Adds execution time into output. Works only with --capture=no (-s)'
     )
 
 
@@ -158,7 +165,7 @@ def mock_backend_error():
                    500: 'Internal server error',
                    503: 'Service unavailable',
                    504: 'Gateway timeout',}
-    # nested function where response replacement logig is implemented
+    # nested function where response replacement  is implemented
     def _mock(page: Page, api: str, status_code: int):
         page.route(api, lambda route: route.fulfill(
             status=status_code,
@@ -190,3 +197,31 @@ def compare_images():
 
         return True if diff_percent <= 100 - percentage else False
     return _compare
+
+
+@pytest.fixture(autouse=True)
+def footer_function_scope(pytestconfig):
+    """Report test durations after each function."""
+    if pytestconfig.getoption('--time'):
+        start = time.time()
+    yield
+    if pytestconfig.getoption('--time'):
+        stop = time.time()
+        delta = stop - start
+        print(f'\n[yellow]test duration[/yellow] : {delta:0.3} seconds')
+
+
+@pytest.fixture(autouse=True, scope='session')
+def footer_session_scope(pytestconfig):
+    """Report the time at the end of a session."""
+    if pytestconfig.getoption('--time'):
+        start = time.time()
+    yield
+    if pytestconfig.getoption('--time'):
+        now = time.time()
+        delta = now - start
+        print(f'\n[yellow]{'-'*30}[/yellow]')
+        print(f'[yellow]Total duration[/yellow] : {delta:0.3} seconds')
+        print(f"[yellow]Started[/yellow] : {time.strftime('%d %b %X', time.localtime(start))}")
+        print(f"[yellow]Finished[/yellow] : {time.strftime('%d %b %X', time.localtime(now))}")
+        print(f'[yellow]{'-'*30}[/yellow]')

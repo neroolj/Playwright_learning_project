@@ -91,11 +91,12 @@ pytest --tracing=retain-on-failure
 
 This project requires the following dependencies:
 
-- pytest
-- playwright
-- pytest-playwright
-- python-dotenv
-- allure-pytest
-- pillow
+- `pytest>=7.0.0`
+- `playwright>=1.40.0`
+- `pytest-playwright>=0.3.0`
+- `python-dotenv>=0.19.0`
+- `allure-pytest>=2.16.2`
+- `pillow` (image comparison helpers in `tests/conftest.py`)
+- `rich` (console output in `tests/conftest.py`)
 
 The package will automatically install these when you run `pip install -e .`
