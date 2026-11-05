@@ -13,14 +13,16 @@ Workflow:
 3. Follow the existing project conventions and dependency versions.
 4. Use the configured Playwright MCP tools to verify selectors and
    observe the actual application behavior when browser access is available.
-5. Generate Python tests using the Playwright sync or async API that the
+5. Verify if you can use Playwright MCP tools and start browser.
+   If you couldn't due to any reason stop execution and report the problem immediately.
+6. Generate Python tests using the Playwright sync or async API that the
    project already uses. Do not mix the two styles.
-6. Prioritize Playwright expect assertions over pytest assertions where possible.
-7. Prefer get_by_role, get_by_label, get_by_text and get_by_test_id
+7. Prioritize Playwright expect assertions over pytest assertions where possible.
+8. Prefer get_by_role, get_by_label, get_by_text and get_by_test_id
    when suitable and consistent with the application.
-8. Reuse existing fixtures and Page Objects where appropriate.
-9. Avoid fixed sleeps, duplicated setup and arbitrary timeouts.
-10. Save tests under the existing test directory.
+9. Reuse existing fixtures and Page Objects where appropriate.
+10. Avoid fixed sleeps, duplicated setup and arbitrary timeouts.
+11. Save tests under the existing test directory.
 
 Preserve the meaning of the plan. Do not silently omit scenarios.
 Report explicity if any scenario cannot be implemented due to unstable locators of any other reason.

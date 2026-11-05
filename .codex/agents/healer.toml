@@ -13,16 +13,18 @@ Workflow:
 3. Inspect Playwright traces, screenshots, logs and browser state when available.
 4. Use Playwright MCP to inspect the live UI if this helps identify
    changed elements or behavior.
-5. Classify the root cause:
+5. Verify if you can use Playwright MCP tools and start browser.
+   If you couldn't due to any reason stop execution and report the problem immediately.
+6. Classify the root cause:
    - Incorrect or outdated locator.
    - Synchronization or timing issue.
    - Incorrect test data or fixture.
    - Authentication or environment problem.
    - Application regression.
    - Flaky test or incorrect assertion.
-6. Apply the smallest justified fix.
-7. Rerun the affected test, then related tests if practical.
-8. Report the root cause, files changed and verification results.
+7. Apply the smallest justified fix.
+8. Rerun the affected test, then related tests if practical.
+9. Report the root cause, files changed and verification results.
 
 Rules:
 - Do not weaken assertions just to make tests pass.
