@@ -5,7 +5,7 @@ import time
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
 from pages.product_page import ProductPage
-from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
+from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage, ZooplusDryFoodPage
 from PIL import Image, ImageChops
 from rich import print
 
@@ -126,6 +126,12 @@ def zooplus_homepage_pom(page: Page) -> ZooplusHomePage:
 def zooplus_loginpage_pom(page: Page) -> ZooplusLoginPage:
     """Fixture creates Zooplus LoginPage"""
     item = ZooplusLoginPage(page)
+    return item
+
+@pytest.fixture()
+def zooplus_dryfoodpage_pom(page: Page) -> ZooplusDryFoodPage:
+    """Fixture creates Zooplus Dry Food page"""
+    item = ZooplusDryFoodPage(page)
     return item
 
 

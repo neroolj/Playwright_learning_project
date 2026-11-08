@@ -32,4 +32,4 @@ def test_login_flow(zooplus_loginpage_pom, zooplus_homepage_pom):
     with allure.step("Login"):
         page.login(login, password)
     with allure.step("Check URL redirection"):
-        page.check_url_redicrection()
+        page.check_url_redirection()
