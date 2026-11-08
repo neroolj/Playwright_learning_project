@@ -282,4 +282,51 @@ def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
 def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
     """Verify that filtering by brand works properly."""
     page = zooplus_dryfoodpage_pom
-    with allure.step()
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Find filter button and expand it if needed'):
+        page.filter_button('Märke')
+    with allure.step('Select first brand in the list'):
+        first_checkbox = page.filter_area('Märke').g.first
+        brand_name = page.option_name(first_checkbox)
+        print(f'\n\nBrand name = {brand_name}\n')
+        first_checkbox.check()
+
+    with allure.step('Verify that filter applied properly'):
+        result = True
+        for p in range(page.all_products.count()):
+            name = page.product_name(page.all_products.nth(p))
+            if not re.match(brand_name, name):
+                result = False
+        assert result
+
+
+def test_brand_filter2(zooplus_dryfoodpage_pom) -> None:
+    """Verify that products match the selected brand filter."""
+    page = zooplus_dryfoodpage_pom
+    page.open()
+
+    # Find and expand the brand filter.
+    brand_filter = page.filter_button("Märke")
+
+    # The filter options are in the panel controlled by the button.
+    panel_id = brand_filter.get_attribute("aria-controls")
+    assert panel_id, "Märke filter button has no associated options panel"
+    options_panel = page.page.locator(f"#{panel_id}")
+
+    # Save the first option's name before selecting its checkbox.
+    first_option = options_panel.get_by_role("checkbox").first
+    brand_name = page.option_name(first_option).strip()
+    first_option.check()
+
+    # Collect product cards, then verify each product name contains the brand.
+    products = page.all_products
+    assert products.count() > 0, "No products were found after applying the brand filter"
+
+    for index in range(products.count()):
+        product_name = page.product_name(products.nth(index))
+        assert brand_name.casefold() in product_name.casefold(), (
+            f"Expected product name {product_name!r} to contain brand {brand_name!r}"
+        )
+
+

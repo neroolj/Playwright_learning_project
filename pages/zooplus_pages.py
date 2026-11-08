@@ -80,11 +80,33 @@ class ZooplusDryFoodPage:
     def filter_button(self, name: str) -> Locator:
         """Finds and returns locator for filter button by name"""
         button = self.page.get_by_role("button", name=name, exact=True)
+        print(f'\n Located filter button(s) = {button.count()}\n')
         if button.get_attribute("aria-expanded") != "true":
             button.click()
         return button
 
-    def all_products(self):
+    def filter_area(self, name: str) -> Locator:
+        """Finds and returns locator for filter area by name"""
+        panel_id = self.filter_button(name).get_attribute("aria-controls")
+        print(f'\n Panel id = {panel_id}\n')
+        area = self.page.locator(f'#{panel_id}')
+        print(f'\n Located area(s) = {area.count()}\n')
+        return area
+
+    @staticmethod
+    def options_inside_filter(filter_button: Locator) -> Locator:
+        """Finds and returns locator for options inside filter button"""
+        options = filter_button.get_by_role('checkbox')
+        return options
+
+    @staticmethod
+    def option_name(option: Locator) -> str:
+        """Returns option name"""
+        return option.locator('data-zta=checkbox-label').inner_text().strip()
+
+
+
+    def all_products(self) -> Locator:
         """Collects all available products"""
         all_products = self.products_grid.locator('.ProductCard_productCard__HRbGU')
         return all_products
@@ -99,6 +121,7 @@ class ZooplusDryFoodPage:
         normalized_price = re.sub(r'[\sa-z]+', "", match.group(1).replace(",", "."))
         return float(normalized_price)
 
-    def all_products_prices(self, all_products: Locator) -> list[float | int]:
-        """Returns list of prices of all available products"""
-        pass
+    @staticmethod
+    def product_name(product: Locator) -> str:
+        name = product.locator('data-zta=product-link').inner_text()
+        return name
