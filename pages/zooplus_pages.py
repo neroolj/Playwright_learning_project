@@ -77,6 +77,10 @@ class ZooplusDryFoodPage:
         self.title = self.page.title()
         expect(self.heading).to_be_visible()
 
+    def wait(self, time: int) -> None:
+        """Waits given amount of miliseconds"""
+        self.page.wait_for_timeout(time)
+
     def filter_button(self, name: str) -> Locator:
         """Finds and returns locator for filter button by name"""
         button = self.page.get_by_role("button", name=name, exact=True)
@@ -88,9 +92,7 @@ class ZooplusDryFoodPage:
     def filter_area(self, name: str) -> Locator:
         """Finds and returns locator for filter area by name"""
         panel_id = self.filter_button(name).get_attribute("aria-controls")
-        print(f'\n Panel id = {panel_id}\n')
         area = self.page.locator(f'#{panel_id}')
-        print(f'\n Located area(s) = {area.count()}\n')
         return area
 
     @staticmethod
@@ -102,9 +104,7 @@ class ZooplusDryFoodPage:
     @staticmethod
     def option_name(option: Locator) -> str:
         """Returns option name"""
-        return option.locator('data-zta=checkbox-label').inner_text().strip()
-
-
+        return option.locator('[data-zta=checkbox-label]').inner_text().strip()
 
     def all_products(self) -> Locator:
         """Collects all available products"""
@@ -123,5 +123,5 @@ class ZooplusDryFoodPage:
 
     @staticmethod
     def product_name(product: Locator) -> str:
-        name = product.locator('data-zta=product-link').inner_text()
+        name = product.locator('[data-zta=product-link]').inner_text()
         return name
