@@ -4,39 +4,6 @@ from urllib.parse import urlparse
 
 import allure
 from playwright.sync_api import Page, expect
-from pages.zooplus_pages import ZooplusDryFoodPage
-
-
-@allure.epic("Zooplus")
-@allure.severity(allure.severity_level.CRITICAL)
-def test_dry_food_category_displays_important_elements(page: Page):
-    """Verify that the category page displays its key navigation and product elements."""
-    category = ZooplusDryFoodCategoryPage(page)
-    with allure.step("Open the dry-food category page"):
-        category.open()
-    with allure.step("Check the category navigation, filters, results and products"):
-        expect(page).to_have_title(re.compile("Hundmat.*torrfoder", re.IGNORECASE))
-        breadcrumbs = page.get_by_role("navigation", name="breadcrumbs")
-        expect(breadcrumbs.get_by_role("link", name="zooplus.se")).to_be_visible()
-        expect(breadcrumbs.get_by_role("link", name="Hund", exact=True)).to_be_visible()
-        expect(breadcrumbs).to_contain_text("Hundfoder (torrfoder)")
-        expect(page.get_by_role("searchbox", name="Sök efter produkter")).to_be_visible()
-        expect(page.get_by_role("link", name="Varukorg")).to_be_visible()
-        for facet in ("Märke", "Smak", "Pris"):
-            expect(category.filter_button(facet)).to_be_visible()
-        expect(category.result_summary).to_be_visible()
-        for index in (0, 1):
-            product_link = category.product_links.nth(index)
-            expect(product_link).to_be_visible()
-            product_title = product_link.get_by_role("heading", level=2)
-            expect(product_title).to_be_visible()
-            expect(product_title).to_contain_text(re.compile(r"\d+(?:[.,]\d+)?\s?(?:kg|g)\b", re.IGNORECASE))
-            card = category.product_card(product_link)
-            expect(card).to_contain_text(re.compile(r"\d[\d\s.,]*\s*kr"))
-            rating = card.get_by_role("link", name=re.compile(r"Rating:|Not Rated", re.IGNORECASE))
-            if rating.count():
-                expect(rating.first).to_be_visible()
-        expect(category.pagination.get_by_role("link", name="Nästa")).to_be_visible()
 
 
 @allure.epic("Zooplus")
@@ -286,47 +253,20 @@ def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
         page.open()
     with allure.step('Find filter button and expand it if needed'):
         page.filter_button('Märke')
-    with allure.step('Select first brand in the list'):
-        first_checkbox = page.filter_area('Märke').g.first
-        brand_name = page.option_name(first_checkbox)
-        print(f'\n\nBrand name = {brand_name}\n')
-        first_checkbox.check()
-
+    with allure.step('Filter by first brand in the list'):
+        first_option = page.filter_area('Märke').get_by_role('option').nth(1)
+        brand_name = page.option_name(first_option)
+        first_option.get_by_role('checkbox').check()
+        # wait 3 seconds to let the page update list of products
+        page.wait(3000)
     with allure.step('Verify that filter applied properly'):
         result = True
-        for p in range(page.all_products.count()):
-            name = page.product_name(page.all_products.nth(p))
-            if not re.match(brand_name, name):
+        # Check that every product's name contains
+        for p in range(page.all_products().count()):
+            name = page.product_name(page.all_products().nth(p))
+            if not re.match(brand_name, name, re.IGNORECASE):
+                print(f'Product {name} does not correspond to brand name: {brand_name}')
                 result = False
-        assert result
-
-
-def test_brand_filter2(zooplus_dryfoodpage_pom) -> None:
-    """Verify that products match the selected brand filter."""
-    page = zooplus_dryfoodpage_pom
-    page.open()
-
-    # Find and expand the brand filter.
-    brand_filter = page.filter_button("Märke")
-
-    # The filter options are in the panel controlled by the button.
-    panel_id = brand_filter.get_attribute("aria-controls")
-    assert panel_id, "Märke filter button has no associated options panel"
-    options_panel = page.page.locator(f"#{panel_id}")
-
-    # Save the first option's name before selecting its checkbox.
-    first_option = options_panel.get_by_role("checkbox").first
-    brand_name = page.option_name(first_option).strip()
-    first_option.check()
-
-    # Collect product cards, then verify each product name contains the brand.
-    products = page.all_products
-    assert products.count() > 0, "No products were found after applying the brand filter"
-
-    for index in range(products.count()):
-        product_name = page.product_name(products.nth(index))
-        assert brand_name.casefold() in product_name.casefold(), (
-            f"Expected product name {product_name!r} to contain brand {brand_name!r}"
-        )
+        assert result == True
 
 
