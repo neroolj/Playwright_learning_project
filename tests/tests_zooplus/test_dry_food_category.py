@@ -216,8 +216,8 @@ def test_product_listing_link_opens_matching_product_detail(page: Page):
         expect(category.heading).to_be_visible()
 
 
-# Below will be tests rewritten by me
 
+# Below will be tests rewritten by me
 @allure.epic("Zooplus")
 @allure.severity(allure.severity_level.CRITICAL)
 def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
@@ -254,7 +254,7 @@ def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
     with allure.step('Find filter button and expand it if needed'):
         page.filter_button('Märke')
     with allure.step('Filter by first brand in the list'):
-        first_option = page.filter_area('Märke').get_by_role('option').nth(1)
+        first_option = page.options_inside_filter_area('Märke').first
         brand_name = page.option_name(first_option)
         first_option.get_by_role('checkbox').check()
         # wait 3 seconds to let the page update list of products
@@ -267,6 +267,6 @@ def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
             if not re.match(brand_name, name, re.IGNORECASE):
                 print(f'Product {name} does not correspond to brand name: {brand_name}')
                 result = False
-        assert result == True
+        assert result
 
 

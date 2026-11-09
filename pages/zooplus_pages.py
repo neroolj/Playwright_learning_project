@@ -77,14 +77,15 @@ class ZooplusDryFoodPage:
         self.title = self.page.title()
         expect(self.heading).to_be_visible()
 
+
     def wait(self, time: int) -> None:
-        """Waits given amount of miliseconds"""
+        """Waits given amount of milliseconds"""
         self.page.wait_for_timeout(time)
+
 
     def filter_button(self, name: str) -> Locator:
         """Finds and returns locator for filter button by name"""
         button = self.page.get_by_role("button", name=name, exact=True)
-        print(f'\n Located filter button(s) = {button.count()}\n')
         if button.get_attribute("aria-expanded") != "true":
             button.click()
         return button
@@ -95,10 +96,10 @@ class ZooplusDryFoodPage:
         area = self.page.locator(f'#{panel_id}')
         return area
 
-    @staticmethod
-    def options_inside_filter(filter_button: Locator) -> Locator:
+
+    def options_inside_filter_area(self, name: str) -> Locator:
         """Finds and returns locator for options inside filter button"""
-        options = filter_button.get_by_role('checkbox')
+        options = self.filter_area(name).get_by_role('option')
         return options
 
     @staticmethod
