@@ -59,6 +59,7 @@ def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
             if not re.match(brand_name, name, re.IGNORECASE):
                 print(f'Product {name} does not correspond to brand name: {brand_name}')
                 result = False
+                break
         assert result
 
 @allure.epic("Zooplus")
@@ -106,14 +107,52 @@ def test_price_filter(zooplus_dryfoodpage_pom) -> None:
         # Check that every product have price in applied range
         for p in range(page.all_products().count()):
             price = page.product_price(page.all_products().nth(p))
-            print(f'Price {price}. Range: {min_price} - {max_price}')
             if not float(min_price) <= price <= float(max_price):
                 print(f'Price {price} is out of range: {min_price} - {max_price}')
                 result = False
+                break
         assert result
 
 
+@allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
+@allure.severity(allure.severity_level.NORMAL)
+def test_filters_combination(zooplus_dryfoodpage_pom) -> None:
+    """Verify that two filters work properly"""
+    min_price = "1000"
+    max_price = "1400"
+    brand = 'Arion'
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Apply brand filter'):
+        page.filter_button('Märke')
+        page.searchbox_inside_filter('Märke').fill(brand)
+        brand_option = page.options_inside_filter_area('Märke')
+        page.option_checkbox(brand_option).check()
+    with allure.step('Apply price filter'):
+        page.filter_button('Pris')
+        page.min_price.fill(min_price)
+        page.max_price.fill(max_price)
+        # wait 2 seconds to let the page update products
+        page.wait(2000)
+    with allure.step('Verify that all products satisfy both filters'):
+        result = True
+        for id in range(page.all_products().count()):
+            current_product = page.all_products().nth(id)
+            price = page.product_price(current_product)
+            name = page.product_name(current_product)
+            if not (float(min_price) <= price <= float(max_price) or re.match('Arion', name, re.IGNORECASE)):
+                print(f'This combination failed: {name}: {price}')
+                result = False
+                break
+        assert result
+
+
+
 # Below are tests to be rewritten
+
+
 
 @allure.epic("Zooplus")
 @allure.severity(allure.severity_level.NORMAL)
