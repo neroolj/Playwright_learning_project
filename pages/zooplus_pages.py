@@ -59,6 +59,8 @@ class ZooplusDryFoodPage:
         self.breadcrumbs = self.page.get_by_role("navigation", name="breadcrumbs")
         self.searchbox = self.page.get_by_role("searchbox", name="Sök efter produkter")
         self.pagination = self.page.locator(".z-pagination")
+        self.min_price = page.get_by_role("textbox", name="Lägsta pris")
+        self.max_price = page.get_by_role("textbox", name="Högsta pris")
         self.title = ''
 
 
@@ -82,6 +84,9 @@ class ZooplusDryFoodPage:
         """Waits given amount of milliseconds"""
         self.page.wait_for_timeout(time)
 
+    def verify_url(self, pattern) -> None:
+        """Verify that given pattern exists in the url"""
+        expect(self.page).to_have_url(re.compile(re.escape(pattern)))
 
     def filter_button(self, name: str) -> Locator:
         """Finds and returns locator for filter button by name"""
@@ -96,6 +101,11 @@ class ZooplusDryFoodPage:
         area = self.page.locator(f'#{panel_id}')
         return area
 
+    def searchbox_inside_filter(self, name: str) -> Locator:
+        """Returns search box locator inside filter"""
+        searchbox = self.filter_area(name).get_by_placeholder('Sök')
+        return searchbox
+
 
     def options_inside_filter_area(self, name: str) -> Locator:
         """Finds and returns locator for options inside filter button"""
@@ -106,6 +116,21 @@ class ZooplusDryFoodPage:
     def option_name(option: Locator) -> str:
         """Returns option name"""
         return option.locator('[data-zta=checkbox-label]').inner_text().strip()
+
+    @staticmethod
+    def option_checkbox(option: Locator) -> Locator:
+        checkbox = option.get_by_role('checkbox')
+        return checkbox
+
+    @staticmethod
+    def option_counter(option: Locator) -> int:
+        """Returns amount of products after applying this particular filter option"""
+        match = re.search(r'\d+', option.inner_text())
+        if match:
+            count = match.group()
+        else:
+            raise AssertionError(f"Could not find count near option. Text was {option.inner_text()}")
+        return int(count)
 
     def all_products(self) -> Locator:
         """Collects all available products"""

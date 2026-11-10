@@ -7,90 +7,113 @@ from playwright.sync_api import Page, expect
 
 
 @allure.epic("Zooplus")
-@allure.severity(allure.severity_level.NORMAL)
-def test_brand_filter_only_displays_products_from_selected_brand(page: Page):
-    """Verify that selecting a brand limits the listing to products from that brand."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Choose an available brand from the Märke filter"):
-        category.filter_button("Märke")
-        old_summary = category.result_summary.inner_text()
-        brand = page.get_by_role("region", name="Märke").get_by_role("checkbox").first
-        brand_name = brand.get_attribute("aria-label") or brand.get_attribute("name")
-        if not brand_name:
-            brand_name = brand.locator("xpath=ancestor::*[@role='option'][1]").inner_text().split("(")[0].strip()
-        brand.check()
-        expect(brand).to_be_checked()
-    with allure.step("Verify the brand selection narrows the listing to that brand"):
-        expect(page).to_have_url(re.compile(r"[?&]filters=.*brand"))
-        expect(page.get_by_role("button", name=re.compile(rf"delete: {re.escape(brand_name)}", re.IGNORECASE))).to_be_visible()
-        expect(category.result_summary).not_to_have_text(old_summary)
-        expect(category.product_links.first).to_be_visible()
-        brand_slug = re.sub(r"[^a-z0-9]+", "_", brand_name.lower()).strip("_")
-        for index in range(category.product_links.count()):
-            link = category.product_links.nth(index)
-            href = (link.get_attribute("href") or "").lower()
-            assert brand_name.lower() in (link.inner_text() + " " + href).lower() or brand_slug in href
-    with allure.step("Clear the selected brand filter"):
-        brand.uncheck()
-        expect(brand).not_to_be_checked()
+@allure.feature('Zooplus dry food page')
+@allure.severity(allure.severity_level.CRITICAL)
+def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
+    """Verify that products page important elements are visible."""
+    page = zooplus_dryfoodpage_pom
+    with allure.step("Open the dry-food category page"):
+        page.open()
+    with allure.step('Verify page title'):
+        print('TITLE = ', page.title)
+        assert re.search(r'Hundmat.*torrfoder', page.title, re.IGNORECASE) is not None
+    with allure.step('Verify breadcrumbs'):
+        breadcrumbs = page.breadcrumbs
+        expect(breadcrumbs.get_by_role("link", name="zooplus.se")).to_be_visible()
+        expect(breadcrumbs.get_by_role("link", name="Hund", exact=True)).to_be_visible()
+        expect(breadcrumbs).to_contain_text("Hundfoder (torrfoder)")
+    with allure.step("Verify that search box is visible"):
+        expect(page.searchbox).to_be_visible()
+    with allure.step("Verify that the most important filters are visible"):
+        for f in page.FILTERS:
+            expect(page.filter_button(f)).to_be_visible()
+    with allure.step("Verify that widget with product cards is visible"):
+        expect(page.products_grid).to_be_visible()
+    with allure.step("Verify that pagination is visible"):
+        expect(page.pagination).to_be_visible()
 
 
 @allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
 @allure.severity(allure.severity_level.NORMAL)
-def test_flavor_filter_changes_the_product_listing(page: Page):
-    """Verify that selecting a flavor updates the active filter and product listing."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Choose an available flavor from the Smak filter"):
-        category.filter_button("Smak")
-        old_summary = category.result_summary.inner_text()
-        flavor = page.get_by_role("region", name="Smak").get_by_role("checkbox").first
-        flavor_name = flavor.get_attribute("aria-label") or flavor.get_attribute("name")
-        if not flavor_name:
-            flavor_name = flavor.locator("xpath=ancestor::*[@role='option'][1]").inner_text().split("(")[0].strip()
-        flavor.check()
-        expect(flavor).to_be_checked()
-    with allure.step("Verify the active flavor filter and updated results"):
-        expect(page).to_have_url(re.compile(r"[?&]filters=.*flavour"))
-        expect(page.get_by_role("button", name=re.compile(rf"delete: {re.escape(flavor_name)}", re.IGNORECASE))).to_be_visible()
-        expect(category.result_summary).not_to_have_text(old_summary)
-        expect(category.product_links.first).to_be_visible()
-    with allure.step("Clear the selected flavor filter"):
-        flavor.uncheck()
-        expect(flavor).not_to_be_checked()
+def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
+    """Verify that filtering by brand works properly."""
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Find filter button and expand it if needed'):
+        page.filter_button('Märke')
+    with allure.step('Filter by first brand in the list'):
+        first_option = page.options_inside_filter_area('Märke').first
+        brand_name = page.option_name(first_option)
+        page.option_checkbox(first_option).check()
+        # wait 2 seconds to let the page update list of products
+        page.wait(2000)
+    with allure.step('Verify that brand filter is applied in URL'):
+        page.verify_url('?filters=brand')
+    with allure.step('Verify that all products match filter'):
+        result = True
+        # Check that every product's name contains
+        for p in range(page.all_products().count()):
+            name = page.product_name(page.all_products().nth(p))
+            if not re.match(brand_name, name, re.IGNORECASE):
+                print(f'Product {name} does not correspond to brand name: {brand_name}')
+                result = False
+        assert result
+
+@allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
+@allure.severity(allure.severity_level.NORMAL)
+def test_flavour_filter(zooplus_dryfoodpage_pom) -> None:
+    """Verify that filtering by flavor works properly."""
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Fill "Fasan" value into searchbox'):
+        page.searchbox_inside_filter('Smak').fill('Fasan')
+    with allure.step('Apply filter'):
+        taste_option = page.options_inside_filter_area('Smak')
+        amount = page.option_counter(taste_option)
+        page.option_checkbox(taste_option).check()
+        # wait 2 seconds to let the page update list of products
+        page.wait(2000)
+    with allure.step('Verify that flavour filter is applied in URL'):
+        page.verify_url('?filters=flavour')
+    with allure.step('Verify that amount of products equal to amount near the filter'):
+        assert page.all_products().count() == amount
 
 
 @allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
 @allure.severity(allure.severity_level.NORMAL)
-def test_price_filter_keeps_listed_item_prices_within_range(page: Page):
-    """Verify that the price filter limits listed product prices to the selected range."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Set a bounded price range based on a currently listed item"):
-        category.filter_button("Pris")
-        minimum = page.get_by_role("textbox", name="Lägsta pris")
-        maximum = page.get_by_role("textbox", name="Högsta pris")
-        starting_prices = category.product_prices(limit=1, exclude_free=True)
-        assert starting_prices, "The category should contain at least one paid product"
-        max_price = math.ceil(starting_prices[0])
-        old_summary = category.result_summary.inner_text()
-        minimum.fill("0")
-        maximum.fill(str(max_price))
-        expect(minimum).to_have_value("0")
-        expect(maximum).to_have_value(str(max_price))
-        maximum.press("Enter")
-        expect(page).to_have_url(re.compile(rf"filters=current_price%3D0%3B{max_price}"))
-        expect(page.get_by_role("button", name=re.compile(rf"delete: 0 till {max_price} kr"))).to_be_visible()
-        expect(category.result_summary).not_to_have_text(old_summary)
-    with allure.step("Check visible active item prices are within the selected range"):
-        expect(category.product_links.first).to_be_visible()
-        for price in category.product_prices(limit=12):
-            assert 0 <= price <= max_price, f"Listed item price {price} is outside 0–{max_price} kr"
-    with allure.step("Restore the default price range"):
-        minimum.fill("0")
-        maximum.fill("9999")
+def test_price_filter(zooplus_dryfoodpage_pom) -> None:
+    """Verify that filtering by price works properly."""
+    min_price = '590'
+    max_price = '600'
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Apply price filter 500-700'):
+        page.filter_button('Pris')
+        page.min_price.fill(min_price)
+        page.max_price.fill(max_price)
+        # wait for 2 seconds to let the page update list of products
+        page.wait(2000)
+    with allure.step('Verify that price filter is applied in URL'):
+        page.verify_url('?filters=current_price')
+    with allure.step(f'Verify that all products have price in range {min_price} to {max_price}'):
+        result = True
+        # Check that every product have price in applied range
+        for p in range(page.all_products().count()):
+            price = page.product_price(page.all_products().nth(p))
+            print(f'Price {price}. Range: {min_price} - {max_price}')
+            if not float(min_price) <= price <= float(max_price):
+                print(f'Price {price} is out of range: {min_price} - {max_price}')
+                result = False
+        assert result
 
+
+# Below are tests to be rewritten
 
 @allure.epic("Zooplus")
 @allure.severity(allure.severity_level.NORMAL)
@@ -214,59 +237,3 @@ def test_product_listing_link_opens_matching_product_detail(page: Page):
     with allure.step("Return to the category listing"):
         page.go_back()
         expect(category.heading).to_be_visible()
-
-
-
-# Below will be tests rewritten by me
-@allure.epic("Zooplus")
-@allure.severity(allure.severity_level.CRITICAL)
-def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
-    """Verify that products page important elements are visible."""
-    page = zooplus_dryfoodpage_pom
-    with allure.step("Open the dry-food category page"):
-        page.open()
-    with allure.step('Verify page title'):
-        print('TITLE = ', page.title)
-        assert re.search(r'Hundmat.*torrfoder', page.title, re.IGNORECASE) is not None
-    with allure.step('Verify breadcrumbs'):
-        breadcrumbs = page.breadcrumbs
-        expect(breadcrumbs.get_by_role("link", name="zooplus.se")).to_be_visible()
-        expect(breadcrumbs.get_by_role("link", name="Hund", exact=True)).to_be_visible()
-        expect(breadcrumbs).to_contain_text("Hundfoder (torrfoder)")
-    with allure.step("Verify that search box is visible"):
-        expect(page.searchbox).to_be_visible()
-    with allure.step("Verify that the most important filters are visible"):
-        for f in page.FILTERS:
-            expect(page.filter_button(f)).to_be_visible()
-    with allure.step("Verify that widget with product cards is visible"):
-        expect(page.products_grid).to_be_visible()
-    with allure.step("Verify that pagination is visible"):
-        expect(page.pagination).to_be_visible()
-
-
-@allure.epic("Zooplus")
-@allure.severity(allure.severity_level.NORMAL)
-def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
-    """Verify that filtering by brand works properly."""
-    page = zooplus_dryfoodpage_pom
-    with allure.step('Open the dry-food category page'):
-        page.open()
-    with allure.step('Find filter button and expand it if needed'):
-        page.filter_button('Märke')
-    with allure.step('Filter by first brand in the list'):
-        first_option = page.options_inside_filter_area('Märke').first
-        brand_name = page.option_name(first_option)
-        first_option.get_by_role('checkbox').check()
-        # wait 3 seconds to let the page update list of products
-        page.wait(3000)
-    with allure.step('Verify that filter applied properly'):
-        result = True
-        # Check that every product's name contains
-        for p in range(page.all_products().count()):
-            name = page.product_name(page.all_products().nth(p))
-            if not re.match(brand_name, name, re.IGNORECASE):
-                print(f'Product {name} does not correspond to brand name: {brand_name}')
-                result = False
-        assert result
-
-
