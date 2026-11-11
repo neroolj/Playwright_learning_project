@@ -1,3 +1,5 @@
+from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError
+
 class ZooplusDryFoodPage:
     """Zooplus dogs dry food page"""
     URL = "https://www.zooplus.se/shop/hund/hundmat_torrfoder"

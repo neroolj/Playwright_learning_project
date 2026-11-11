@@ -3,7 +3,7 @@ import allure
 import os
 import time
 from dotenv import load_dotenv
-from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
+from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright, TimeoutError as PlaywrightTimeoutError
 from pages.product_page import ProductPage
 from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
 from pages.zooplus_dry_food_page import ZooplusDryFoodPage
@@ -73,7 +73,14 @@ def generate_auth_state_demoblaze():
 def zooplus_homepage(page: Page):
     """Fixture creates page with accepted cookies"""
     page.goto("https://www.zooplus.se/")
-    page.get_by_role("button", name="Endast nödvändiga kakor").click()
+    cookie_button = page.get_by_role("button", name="Endast nödvändiga kakor")
+    try:
+        # Wait for cookie_button to be visible
+        cookie_button.wait_for(state="visible", timeout=3000)
+    except PlaywrightTimeoutError:
+        pass
+    else:
+        cookie_button.click()
     return page
 
 
@@ -83,7 +90,14 @@ def auth_context_zooplus(browser: Browser):
     context = browser.new_context()
     page = context.new_page()
     page.goto("https://www.zooplus.se/")
-    page.get_by_role("button", name="Endast nödvändiga kakor").click()
+    cookie_button = page.get_by_role("button", name="Endast nödvändiga kakor")
+    try:
+        # Wait for cookie_button to be visible
+        cookie_button.wait_for(state="visible", timeout=3000)
+    except PlaywrightTimeoutError:
+        pass
+    else:
+        cookie_button.click()
     page.get_by_role("button", name="Meny för mitt zooplus").click()
     page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
     page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
@@ -208,7 +222,7 @@ def compare_images():
 
 @pytest.fixture(autouse=True)
 def footer_function_scope(pytestconfig):
-    """Report test durations after each function."""
+    """Report test durations after each function into STDOUT."""
     if pytestconfig.getoption('--time'):
         start = time.time()
     yield
@@ -220,7 +234,7 @@ def footer_function_scope(pytestconfig):
 
 @pytest.fixture(autouse=True, scope='session')
 def footer_session_scope(pytestconfig):
-    """Report the time at the end of a session."""
+    """Report the time at the end of a session into STDOUT."""
     if pytestconfig.getoption('--time'):
         start = time.time()
     yield
