@@ -1,9 +1,6 @@
-import math
 import re
-from urllib.parse import urlparse
-
 import allure
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 
 @allure.epic("Zooplus")
@@ -15,7 +12,6 @@ def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
     with allure.step("Open the dry-food category page"):
         page.open()
     with allure.step('Verify page title'):
-        print('TITLE = ', page.title)
         assert re.search(r'Hundmat.*torrfoder', page.title, re.IGNORECASE) is not None
     with allure.step('Verify breadcrumbs'):
         breadcrumbs = page.breadcrumbs

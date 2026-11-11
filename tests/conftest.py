@@ -5,7 +5,8 @@ import time
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright
 from pages.product_page import ProductPage
-from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage, ZooplusDryFoodPage
+from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
+from pages.zooplus_dry_food_page import ZooplusDryFoodPage
 from PIL import Image, ImageChops
 from rich import print
 
