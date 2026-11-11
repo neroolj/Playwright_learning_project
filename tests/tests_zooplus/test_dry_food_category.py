@@ -195,57 +195,52 @@ def test_sorting_by_price(zooplus_dryfoodpage_pom) -> None:
 @allure.feature('Zooplus dry food page')
 @allure.severity(allure.severity_level.CRITICAL)
 def test_pagination(zooplus_dryfoodpage_pom) -> None:
-    """Verify that pagination moves forward and backward"""
+    """Verify that pagination works properly"""
     page = zooplus_dryfoodpage_pom
     with allure.step('Open the dry-food category page'):
         page.open()
+    with allure.step('Make sure that pagination element is visible on the page'):
+        expect(page.pagination).to_be_visible()
     with allure.step('Record the first product ID'):
-        first_page_first_product_id = page.all_products().first.get_attribute("id")
-    with allure.step('Check that previous page button is disabled as we are on the first page'):
+        first_product_1st_page = page.product_id(page.all_products().first)
+    with allure.step('Check that [Previous page] button is disabled as we are on the first page'):
         expect(page.prev_page).to_be_disabled()
     with allure.step('Open the next page'):
         page.next_page.click()
     with allure.step('Verify that current page is in URL'):
         page.verify_url('?p=2')
+    with allure.step('Verify that [Previous page] button is enabled now'):
+        expect(page.prev_page).to_be_enabled()
     with allure.step('Verify that first product on the second page is different'):
-        pass
-        # to be continued
-
-
-
-
-
-# AI generated
-    with allure.step("Record the first product and check first-page controls"):
-        first_page_first_product = category.product_links.first.get_attribute("href")
-        expect(category.pagination.get_by_role("button", name="Föregående")).to_be_disabled()
-        next_page = category.pagination.get_by_role("link", name="Nästa")
-    with allure.step("Navigate to page 2 and verify the listing changes"):
-        next_page.click()
-        expect(page).to_have_url(re.compile(r"[?&]p=2(?:&|$)"))
-        expect(category.product_links.first).to_be_visible()
-        expect(category.product_links.first).not_to_have_attribute("href", first_page_first_product)
-    with allure.step("Return to the first page"):
-        category.pagination.get_by_role("link", name="1", exact=True).click()
-        expect(page).not_to_have_url(re.compile(r"[?&]p=2(?:&|$)"))
-        expect(category.product_links.first).to_have_attribute("href", first_page_first_product)
+        first_product_2nd_page = page.product_id(page.all_products().first)
+        assert first_product_1st_page != first_product_2nd_page
+    with allure.step('Go back to the first page'):
+        page.prev_page.click()
+    with allure.step('Verify that first product on the page remained the same'):
+        assert first_product_1st_page == page.product_id(page.all_products().first)
 
 
 @allure.epic("Zooplus")
-@allure.severity(allure.severity_level.NORMAL)
-def test_product_listing_link_opens_matching_product_detail(page: Page):
-    """Verify that a product listing link opens the matching product detail page."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Open the first product detail page from the listing"):
-        product_link = category.product_links.first
-        product_name = product_link.get_by_role("heading", level=2).inner_text()
-        product_url = product_link.get_attribute("href")
-        product_link.click()
-    with allure.step("Verify product detail matches the selected listing"):
-        expect(page).to_have_url(re.compile(re.escape(urlparse(product_url).path)))
-        heading_name = re.compile(re.escape(product_name.split("\n")[0]), re.IGNORECASE)
-        expect(page.get_by_role("heading", name=heading_name).first).to_be_visible()
-    with allure.step("Return to the category listing"):
-        page.go_back()
-        expect(category.heading).to_be_visible()
+@allure.feature('Zooplus dry food page')
+@allure.severity(allure.severity_level.BLOCKER)
+def test_product_listning_opens_matching_product(zooplus_dryfoodpage_pom):
+    """Verify that click on product opens matching product detail page."""
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Save details of the first product on the page'):
+        product = page.all_products().first
+        product_name = page.product_name(product)
+        product_price = page.product_price(product)
+        product_id = page.product_id(product)
+    with allure.step('Click on the first product on the page'):
+        # print(f'Product html: {product.inner_html()}')
+        product.locator('[data-zta=product-link]').click()
+        # wait 2 seconds to let the page udpate
+        page.wait(2000)
+    with (allure.step('Verify that right product is opened')):
+        page.verify_url(product_id)
+        expect(page.page).to_have_title(re.compile(rf'{product_name}'))
+        assert product_price == page.product_price(page.page.locator('[data-zta=SelectedArticleBox]'))
+
+

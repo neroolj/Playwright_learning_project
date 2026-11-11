@@ -64,8 +64,8 @@ class ZooplusDryFoodPage:
         self.breadcrumbs = self.page.get_by_role("navigation", name="breadcrumbs")
         self.searchbox = self.page.get_by_role("searchbox", name="Sök efter produkter")
         self.pagination = self.page.locator(".z-pagination")
-        self.prev_page = self.pagination.get_by_role('button', name='Föregående')
-        self.next_page = self.pagination.get_by_role('button', name='Nästa')
+        self.prev_page = self.pagination.locator('[data-zta=paginationPrevious]')
+        self.next_page = self.pagination.locator('[data-zta=paginationNext]')
         self.min_price = page.get_by_role("textbox", name="Lägsta pris")
         self.max_price = page.get_by_role("textbox", name="Högsta pris")
         self.sorting_selector = page.locator('[data-zta="product-sorting-selector"]')
@@ -157,7 +157,7 @@ class ZooplusDryFoodPage:
     @staticmethod
     def product_price(product: Locator) -> float | int:
         """Returns price of product"""
-        price = product.locator('.z-product-price__amount').inner_text()
+        price = product.locator('.z-product-price__amount').first.inner_text()
         match = re.search(r'(\d[\d\s]*,\d{2})\s*kr', price)
         if not match:
             raise AssertionError(f"Price was not found")
@@ -172,6 +172,14 @@ class ZooplusDryFoodPage:
         if not name:
             raise AssertionError(f'Product name was not found')
         return name
+
+    @staticmethod
+    def product_id(product: Locator) -> str:
+        """Returns id of product"""
+        product_id = product.get_attribute("id")
+        if not product_id:
+            raise AssertionError('Product id was not found')
+        return product_id
 
 
     def _select_sorting_option(self, option_value):
