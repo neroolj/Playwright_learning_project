@@ -1,4 +1,5 @@
-from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError
+import re
+from playwright.sync_api import Page, expect, Locator, TimeoutError as PlaywrightTimeoutError
 
 class ZooplusDryFoodPage:
     """Zooplus dogs dry food page"""
