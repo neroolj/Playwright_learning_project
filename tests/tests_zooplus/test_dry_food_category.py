@@ -44,7 +44,7 @@ def test_brand_filter(zooplus_dryfoodpage_pom) -> None:
     with allure.step('Find filter button and expand it if needed'):
         page.filter_button('Märke')
     with allure.step('Filter by first brand in the list'):
-        first_option = page.options_inside_filter_area('Märke').first
+        first_option = page.options_inside_filter('Märke').first
         brand_name = page.option_name(first_option)
         page.option_checkbox(first_option).check()
         # wait 2 seconds to let the page update list of products
@@ -73,7 +73,7 @@ def test_flavour_filter(zooplus_dryfoodpage_pom) -> None:
     with allure.step('Fill "Fasan" value into searchbox'):
         page.searchbox_inside_filter('Smak').fill('Fasan')
     with allure.step('Apply filter'):
-        taste_option = page.options_inside_filter_area('Smak')
+        taste_option = page.options_inside_filter('Smak')
         amount = page.option_counter(taste_option)
         page.option_checkbox(taste_option).check()
         # wait 2 seconds to let the page update list of products
@@ -128,7 +128,7 @@ def test_filters_combination(zooplus_dryfoodpage_pom) -> None:
     with allure.step('Apply brand filter'):
         page.filter_button('Märke')
         page.searchbox_inside_filter('Märke').fill(brand)
-        brand_option = page.options_inside_filter_area('Märke')
+        brand_option = page.options_inside_filter('Märke')
         page.option_checkbox(brand_option).check()
     with allure.step('Apply price filter'):
         page.filter_button('Pris')

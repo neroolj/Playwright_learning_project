@@ -84,62 +84,70 @@ class ZooplusDryFoodPage:
         """Waits given amount of milliseconds"""
         self.page.wait_for_timeout(time)
 
-    def verify_url(self, pattern) -> None:
-        """Verify that given pattern exists in the url"""
-        expect(self.page).to_have_url(re.compile(re.escape(pattern)))
+
+    def verify_url(self, text) -> None:
+        """Verify that given text exists in the url"""
+        expect(self.page).to_have_url(re.compile(re.escape(text)))
+
 
     def filter_button(self, name: str) -> Locator:
-        """Finds and returns locator for filter button by name"""
+        """Finds and returns locator for filter button by name
+        Clicks the button to expand filter options if it wasn't """
         button = self.page.get_by_role("button", name=name, exact=True)
         if button.get_attribute("aria-expanded") != "true":
             button.click()
         return button
 
-    def filter_area(self, name: str) -> Locator:
-        """Finds and returns locator for filter area by name"""
-        panel_id = self.filter_button(name).get_attribute("aria-controls")
-        area = self.page.locator(f'#{panel_id}')
-        return area
 
     def searchbox_inside_filter(self, name: str) -> Locator:
-        """Returns search box locator inside filter"""
-        searchbox = self.filter_area(name).get_by_placeholder('Sök')
+        """Returns locator for searchbox inside filter"""
+        panel_id = self.filter_button(name).get_attribute('aria-controls')
+        area = self.page.locator(f'#{panel_id}')
+        searchbox = area.get_by_placeholder('Sök')
         return searchbox
 
 
-    def options_inside_filter_area(self, name: str) -> Locator:
-        """Finds and returns locator for options inside filter button"""
-        options = self.filter_area(name).get_by_role('option')
+    def options_inside_filter(self, name: str) -> Locator:
+        """Finds and returns locator for all options inside filter"""
+        panel_id = self.filter_button(name).get_attribute('aria-controls')
+        area = self.page.locator(f'#{panel_id}')
+        options = area.get_by_role('option')
         return options
+
 
     @staticmethod
     def option_name(option: Locator) -> str:
-        """Returns option name"""
+        """Returns options name"""
         return option.locator('[data-zta=checkbox-label]').inner_text().strip()
+
 
     @staticmethod
     def option_checkbox(option: Locator) -> Locator:
+        """Returns locator for option's checkbox"""
         checkbox = option.get_by_role('checkbox')
         return checkbox
 
+
     @staticmethod
     def option_counter(option: Locator) -> int:
-        """Returns amount of products after applying this particular filter option"""
+        """Returns amount of products which should be shown after applying this particular filter option"""
         match = re.search(r'\d+', option.inner_text())
         if match:
             count = match.group()
         else:
-            raise AssertionError(f"Could not find count near option. Text was {option.inner_text()}")
+            raise AssertionError(f"Could not find counter near the option. Text was {option.inner_text()}")
         return int(count)
 
+
     def all_products(self) -> Locator:
-        """Collects all available products"""
+        """Collects and returns all available products"""
         all_products = self.products_grid.locator('.ProductCard_productCard__HRbGU')
         return all_products
 
+
     @staticmethod
     def product_price(product: Locator) -> float | int:
-        """Returns the price of product"""
+        """Returns price of product"""
         price = product.locator('.z-product-price__amount').inner_text()
         match = re.search(r'(\d[\d\s]*,\d{2})\s*kr', price)
         if not match:
@@ -147,7 +155,11 @@ class ZooplusDryFoodPage:
         normalized_price = re.sub(r'[\sa-z]+', "", match.group(1).replace(",", "."))
         return float(normalized_price)
 
+
     @staticmethod
     def product_name(product: Locator) -> str:
+        """Returns name of product"""
         name = product.locator('[data-zta=product-link]').inner_text()
+        if not name:
+            raise AssertionError(f'Product name was not found')
         return name
