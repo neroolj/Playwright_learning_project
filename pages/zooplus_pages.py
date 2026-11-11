@@ -1,9 +1,11 @@
+from mdurl import URL
 from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError, Locator
 import re
 
 
 class ZooplusHomePage:
     """Zooplus home page"""
+    URL = 'https://www.zooplus.se/'
     def __init__(self, page: Page):
         self.page: Page = page
         self.menu_button = self.page.get_by_role("button", name="Meny för mitt zooplus")
@@ -21,7 +23,7 @@ class ZooplusHomePage:
 
     def open_home_page(self):
         """Opens home page"""
-        self.page.goto("https://www.zooplus.se/")
+        self.page.goto(self.URL)
         self.decline_cookie()
 
 
@@ -34,16 +36,19 @@ class ZooplusLoginPage:
         self.login_button = self.page.get_by_role("button", name="Logga in")
 
     def login(self, username: str, password: str):
+        """Login by provided username and password"""
         self.login_field.fill(username)
         self.pass_field.fill(password)
         self.login_button.click()
 
     @staticmethod
     def open_login_page(homepage: ZooplusHomePage):
+        """Navigates to login page"""
         homepage.open_home_page()
         homepage.menu_button.click()
 
     def check_url_redirection(self):
+        """Verifies that user is redirected to right URL after login"""
         expect(self.page).to_have_url('https://www.zooplus.se/account/overview')
 
 
@@ -59,8 +64,12 @@ class ZooplusDryFoodPage:
         self.breadcrumbs = self.page.get_by_role("navigation", name="breadcrumbs")
         self.searchbox = self.page.get_by_role("searchbox", name="Sök efter produkter")
         self.pagination = self.page.locator(".z-pagination")
+        self.prev_page = self.pagination.get_by_role('button', name='Föregående')
+        self.next_page = self.pagination.get_by_role('button', name='Nästa')
         self.min_price = page.get_by_role("textbox", name="Lägsta pris")
         self.max_price = page.get_by_role("textbox", name="Högsta pris")
+        self.sorting_selector = page.locator('[data-zta="product-sorting-selector"]')
+        self.sorting_button = self.sorting_selector.locator('[data-zta="selectMenuTriggerButton"]')
         self.title = ''
 
 
@@ -163,3 +172,26 @@ class ZooplusDryFoodPage:
         if not name:
             raise AssertionError(f'Product name was not found')
         return name
+
+
+    def _select_sorting_option(self, option_value):
+        """Private method used below in sorting methods"""
+        self.sorting_button.click()
+        self.sorting_selector.locator(
+            f'[data-option-value="{option_value}"]'
+        ).click()
+
+
+    def sort_by_price_low_to_high(self):
+        """Selects sorting by price from low to high"""
+        self._select_sorting_option("lowest-price")
+
+
+    def sort_by_price_high_to_low(self):
+        """Selects sorting by price from high to low"""
+        self._select_sorting_option("highest-price")
+
+
+    def go_to_page(self, page: int) -> None:
+        """Uses pagination to navigate to exact page"""
+        pass

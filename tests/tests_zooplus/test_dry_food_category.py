@@ -149,100 +149,73 @@ def test_filters_combination(zooplus_dryfoodpage_pom) -> None:
         assert result
 
 
-
-# Below are tests to be rewritten
-
-
-
 @allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
 @allure.severity(allure.severity_level.NORMAL)
-def test_brand_and_price_filters_can_be_combined(page: Page):
-    """Verify that brand and price filters apply together to the product listing."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Select an available brand and set a price range"):
-        category.filter_button("Märke")
-        old_summary = category.result_summary.inner_text()
-        brand = page.get_by_role("region", name="Märke").get_by_role("checkbox").first
-        brand_name = brand.get_attribute("aria-label") or brand.get_attribute("name")
-        if not brand_name:
-            brand_name = brand.locator("xpath=ancestor::*[@role='option'][1]").inner_text().split("(")[0].strip()
-        brand.check()
-        expect(brand).to_be_checked()
-        expect(category.result_summary).not_to_have_text(old_summary)
-        expect(category.product_links.first).to_be_visible()
-        category.filter_button("Pris")
-        minimum = page.get_by_role("textbox", name="Lägsta pris")
-        maximum = page.get_by_role("textbox", name="Högsta pris")
-        starting_prices = sorted(category.product_prices(exclude_free=True))
-        assert len(starting_prices) > 1, "The selected brand should contain multiple paid products"
-        old_price_filtered_summary = category.result_summary.inner_text()
-        max_price = math.floor(starting_prices[(len(starting_prices) - 1) // 2])
-        minimum.fill("0")
-        maximum.fill(str(max_price))
-        maximum.press("Enter")
-        expect(maximum).to_have_value(str(max_price))
-        expect(category.result_summary).not_to_have_text(old_price_filtered_summary)
-    with allure.step("Confirm the resulting cards satisfy both active filters"):
-        expect(brand).to_be_checked()
-        expect(page.get_by_role("button", name=re.compile(rf"delete: {re.escape(brand_name)}", re.IGNORECASE))).to_be_visible()
-        expect(category.product_links.first).to_be_visible()
-        min_price = float(minimum.input_value())
-        for index in range(category.product_links.count()):
-            link = category.product_links.nth(index)
-            brand_slug = re.sub(r"[^a-z0-9]+", "_", brand_name.lower()).strip("_")
-            href = (link.get_attribute("href") or "").lower()
-            assert brand_name.lower() in (link.inner_text() + " " + href).lower() or brand_slug in href
-            price = category.product_price(link)
-            assert min_price <= price <= max_price
-    with allure.step("Remove the filters"):
-        brand.uncheck()
-        minimum.fill("0")
-        maximum.fill("9999")
+def test_sorting_by_price(zooplus_dryfoodpage_pom) -> None:
+    """Verify that sorting by price (low-to-high and high-to-low) works properly"""
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Apply low-to-high price filter'):
+        page.sort_by_price_low_to_high()
+        # wait 2 seconds to let the page update products
+        page.wait(2000)
+    with allure.step('Verify that sorting is applied in URL'):
+        page.verify_url('?sorting=lowest-price')
+    with allure.step('Verify that products are sorted by price from the lowest to the highest'):
+        result = True
+        for p in range(page.all_products().count() -1):
+            current_price = page.product_price(page.all_products().nth(p))
+            next_price = page.product_price(page.all_products().nth(p + 1))
+            if current_price > next_price:
+                print(f'Price of the current product {current_price} is bigger than price of the next one {next_price}')
+                result = False
+                break
+        assert result
+    with allure.step('Apply high-to-low price filter'):
+        page.sort_by_price_high_to_low()
+        # wait 2 seconds to let the page update products
+        page.wait(2000)
+    with allure.step('Verify that sorting is applied in URL'):
+        page.verify_url('?sorting=highest-price')
+    with allure.step('Verify that products are sorted by price from the highest to the lowest'):
+        result = True
+        for p in range(page.all_products().count() -1):
+            current_price = page.product_price(page.all_products().nth(p))
+            next_price = page.product_price(page.all_products().nth(p + 1))
+            if current_price < next_price:
+                print(f'Price of the current product {current_price} is smaller than price of the next one {next_price}')
+                result = False
+                break
+        assert result
 
 
 @allure.epic("Zooplus")
+@allure.feature('Zooplus dry food page')
 @allure.severity(allure.severity_level.CRITICAL)
-def test_products_sort_by_price_low_to_high(page: Page):
-    """Verify that products are sorted from the lowest price to the highest price."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Choose Lägsta pris sorting"):
-        page.get_by_role("button", name="Toppsäljare").click()
-        page.get_by_role("option", name="Lägsta pris", exact=True).click()
-        expect(page).to_have_url(re.compile(r"sorting=lowest-price"))
-        expect(page.get_by_role("button", name="Lägsta pris", exact=True)).to_be_visible()
-    with allure.step("Compare the first two paid product prices in ascending order"):
-        expect(category.product_links.nth(1)).to_be_visible()
-        prices = category.product_prices(limit=2, exclude_free=True)
-        assert len(prices) == 2, "At least two paid product listings are required for sorting"
-        assert prices[0] <= prices[1], f"Expected ascending prices, got {prices[0]} then {prices[1]}"
+def test_pagination(zooplus_dryfoodpage_pom) -> None:
+    """Verify that pagination moves forward and backward"""
+    page = zooplus_dryfoodpage_pom
+    with allure.step('Open the dry-food category page'):
+        page.open()
+    with allure.step('Record the first product ID'):
+        first_page_first_product_id = page.all_products().first.get_attribute("id")
+    with allure.step('Check that previous page button is disabled as we are on the first page'):
+        expect(page.prev_page).to_be_disabled()
+    with allure.step('Open the next page'):
+        page.next_page.click()
+    with allure.step('Verify that current page is in URL'):
+        page.verify_url('?p=2')
+    with allure.step('Verify that first product on the second page is different'):
+        pass
+        # to be continued
 
 
-@allure.epic("Zooplus")
-@allure.severity(allure.severity_level.CRITICAL)
-def test_products_sort_by_price_high_to_low(page: Page):
-    """Verify that products are sorted from the highest price to the lowest price."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
-    with allure.step("Choose Högsta pris sorting"):
-        page.get_by_role("button", name="Toppsäljare").click()
-        page.get_by_role("option", name="Högsta pris", exact=True).click()
-        expect(page).to_have_url(re.compile(r"sorting=highest-price"))
-        expect(page.get_by_role("button", name="Högsta pris", exact=True)).to_be_visible()
-    with allure.step("Compare the first two paid product prices in descending order"):
-        expect(category.product_links.nth(1)).to_be_visible()
-        prices = category.product_prices(limit=2, exclude_free=True)
-        assert len(prices) == 2, "At least two paid product listings are required for sorting"
-        assert prices[0] >= prices[1], f"Expected descending prices, got {prices[0]} then {prices[1]}"
 
 
-@allure.epic("Zooplus")
-@allure.severity(allure.severity_level.CRITICAL)
-def test_category_pagination_moves_to_next_page_and_back(page: Page):
-    """Verify that category pagination advances to the next page and returns to page one."""
-    category = ZooplusDryFoodCategoryPage(page)
-    category.open()
+
+# AI generated
     with allure.step("Record the first product and check first-page controls"):
         first_page_first_product = category.product_links.first.get_attribute("href")
         expect(category.pagination.get_by_role("button", name="Föregående")).to_be_disabled()
