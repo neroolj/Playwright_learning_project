@@ -1,6 +1,4 @@
-from mdurl import URL
-from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError, Locator
-import re
+from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError
 
 
 class ZooplusHomePage:

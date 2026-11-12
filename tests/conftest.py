@@ -1,183 +1,14 @@
+"""Shader fixtures for all tests"""
+
 import pytest
-import allure
-import os
-import time
-from dotenv import load_dotenv
-from playwright.sync_api import Browser, Page, BrowserContext, sync_playwright, TimeoutError as PlaywrightTimeoutError
-from pages.product_page import ProductPage
-from pages.zooplus_pages import ZooplusHomePage, ZooplusLoginPage
-from pages.zooplus_dry_food_page import ZooplusDryFoodPage
+from playwright.sync_api import Page
 from PIL import Image, ImageChops
-from rich import print
 
-
-# Load variables from .env
-load_dotenv()
-ZOOPLUS_USERNAME = os.getenv('ZOOPLUS_USERNAME')
-ZOOPLUS_PASSWORD = os.getenv('ZOOPLUS_PASSWORD')
-
-# define location of auth_data
-STATE_FILE = ".auth_states/test_state.json"
-STATE_FOLDER = STATE_FILE.split("/")[0]
-
-
-def pytest_addoption(parser):
-    """Register new CLI for screenshot generation"""
-    parser.addoption(
-        '--gen-screenshots',
-        action='store_true',
-        default=False,
-        help='Generate screenshots for playwright tests'
-    )
-    parser.addoption(
-        '--time',
-        action='store_true',
-        help='Adds execution time into output. Works only with --capture=no (-s)'
-    )
-
-
-@pytest.fixture(scope="session", autouse=True)
-def generate_auth_state_demoblaze():
-    """Fixture to create test_state.json for demoblaze.com"""
-    # Create folder if it doesn't exist
-    if not os.path.exists(STATE_FOLDER):
-        os.mkdir(STATE_FOLDER)
-
-    # Create file only if it doesn't exist
-    if not os.path.exists(STATE_FILE):
-        test_user = os.getenv("TEST_USER")
-        test_pass = os.getenv("TEST_PASS")
-
-        with sync_playwright() as p:
-            # Create browser -> context -> page
-            browser = p.chromium.launch()
-            context = browser.new_context()
-            page = context.new_page()
-
-            # Login
-            page.goto("https://demoblaze.com/")
-            page.get_by_role("link", name="Log in").click()
-            page.locator("#loginusername").fill(test_user)
-            page.locator("#loginpassword").fill(test_pass)
-            page.get_by_role("button", name="Log in").click()
-
-            # Make sure that login is finished
-            page.locator("#nameofuser").wait_for()
-
-            # Save data to file
-            context.storage_state(path=STATE_FILE)
-            browser.close()
-
-
-@pytest.fixture()
-def zooplus_homepage(page: Page):
-    """Fixture creates page with accepted cookies"""
-    page.goto("https://www.zooplus.se/")
-    cookie_button = page.get_by_role("button", name="Endast nödvändiga kakor")
-    try:
-        # Wait for cookie_button to be visible
-        cookie_button.wait_for(state="visible", timeout=3000)
-    except PlaywrightTimeoutError:
-        pass
-    else:
-        cookie_button.click()
-    return page
-
-
-@pytest.fixture(scope="session")
-def auth_context_zooplus(browser: Browser):
-    """Fixture creates logged in context for zooplus"""
-    context = browser.new_context()
-    page = context.new_page()
-    page.goto("https://www.zooplus.se/")
-    cookie_button = page.get_by_role("button", name="Endast nödvändiga kakor")
-    try:
-        # Wait for cookie_button to be visible
-        cookie_button.wait_for(state="visible", timeout=3000)
-    except PlaywrightTimeoutError:
-        pass
-    else:
-        cookie_button.click()
-    page.get_by_role("button", name="Meny för mitt zooplus").click()
-    page.get_by_role("textbox", name="E-postadress").fill(ZOOPLUS_USERNAME)
-    page.get_by_role("textbox", name="Lösenord").fill(ZOOPLUS_PASSWORD)
-    page.get_by_role("button", name="Logga in").click()
-    page.get_by_test_id('balance-points-header-component').first.wait_for()
-    yield context
-    context.close()
-
-
-@pytest.fixture()
-def auth_page_zooplus(auth_context_zooplus : BrowserContext):
-    """Fixture creates page based on logged in context"""
-    page = auth_context_zooplus.new_page()
-    yield page
-    page.close()
-
-
-@pytest.fixture()
-def auth_page_test(browser: Browser):
-    """Fixture creates page using logged on state from "test_state.json" file """
-    context = browser.new_context(storage_state=".auth_states/test_state.json")
-    page = context.new_page()
-    page.goto('https://demoblaze.com/')
-    yield page
-    page.close()
-
-# Pages for Page Object Model approach
-@pytest.fixture()
-def product_page(page: Page) -> ProductPage:
-    """Fixture creates ProductPage"""
-    item = ProductPage(page)
-    return item
-
-@pytest.fixture()
-def zooplus_homepage_pom(page: Page) -> ZooplusHomePage:
-    """Fixture creates Zooplus HomePage"""
-    item = ZooplusHomePage(page)
-    return item
-
-@pytest.fixture()
-def zooplus_loginpage_pom(page: Page) -> ZooplusLoginPage:
-    """Fixture creates Zooplus LoginPage"""
-    item = ZooplusLoginPage(page)
-    return item
-
-@pytest.fixture()
-def zooplus_dryfoodpage_pom(page: Page) -> ZooplusDryFoodPage:
-    """Fixture creates Zooplus Dry Food page"""
-    item = ZooplusDryFoodPage(page)
-    return item
-
-
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """This hook collects screenshot and attach it to Allure report if test failed"""""
-
-    # save test result which is sent by Pytest via .send() method
-    outcome = yield
-
-    # extract result
-    report = outcome.get_result()
-
-    # check if we are on executing stage and test failed
-    if report.when == "call" and report.failed:
-
-        # save current page element depending on which fixture is used
-        page = item.funcargs.get('page') or item.funcargs.get('auth_page_test') or item.funcargs.get('auth_page_zooplus')
-
-        # if page exists collect screenshot and attach it to Allure report
-        if page:
-            allure.attach(
-                page.screenshot(full_page=True),
-                name="Screenshot",
-                attachment_type=allure.attachment_type.PNG
-            )
 
 
 @pytest.fixture()
 def mock_backend_error():
-    """Fixture captures API requests and mocks response with error code"""
+    """Fixture captures API requests and mocks response with specific error code"""
     # list of supported codes
     error_codes = {400: 'Bad request',
                    401: 'Unauthorized',
@@ -186,7 +17,7 @@ def mock_backend_error():
                    500: 'Internal server error',
                    503: 'Service unavailable',
                    504: 'Gateway timeout',}
-    # nested function where response replacement  is implemented
+    # nested function where response replacement is implemented
     def _mock(page: Page, api: str, status_code: int):
         page.route(api, lambda route: route.fulfill(
             status=status_code,
@@ -218,31 +49,3 @@ def compare_images():
 
         return True if diff_percent <= 100 - percentage else False
     return _compare
-
-
-@pytest.fixture(autouse=True)
-def footer_function_scope(pytestconfig):
-    """Report test durations after each function into STDOUT."""
-    if pytestconfig.getoption('--time'):
-        start = time.time()
-    yield
-    if pytestconfig.getoption('--time'):
-        stop = time.time()
-        delta = stop - start
-        print(f'\n[yellow]test duration[/yellow] : {delta:0.3} seconds')
-
-
-@pytest.fixture(autouse=True, scope='session')
-def footer_session_scope(pytestconfig):
-    """Report the time at the end of a session into STDOUT."""
-    if pytestconfig.getoption('--time'):
-        start = time.time()
-    yield
-    if pytestconfig.getoption('--time'):
-        now = time.time()
-        delta = now - start
-        print(f'\n[yellow]{'-'*30}[/yellow]')
-        print(f'[yellow]Total duration[/yellow] : {delta:0.3} seconds')
-        print(f"[yellow]Started[/yellow] : {time.strftime('%d %b %X', time.localtime(start))}")
-        print(f"[yellow]Finished[/yellow] : {time.strftime('%d %b %X', time.localtime(now))}")
-        print(f'[yellow]{'-'*30}[/yellow]')

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-user_name = os.getenv('TEST_USER')
+user_name = os.getenv('DEMOBLAZE_USER')
 
 def add_to_cart_dialog(dialog):
     assert dialog.message == 'Product added'

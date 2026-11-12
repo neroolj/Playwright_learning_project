@@ -1,6 +1,6 @@
 import os.path
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 import allure
 
 
@@ -79,6 +79,8 @@ def test_top_navigation_visual(page: Page, request, compare_images, img_name, lo
     with allure.step('Open page and find element'):
         page.goto('https://demoblaze.com/')
         element = page.locator(locator)
+        # wait 2 seconds to let the page load all images
+        page.wait_for_timeout(2000)
 
     if gen_mode:
         with allure.step('Update etalon screenshot'):

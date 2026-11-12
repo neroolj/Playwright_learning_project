@@ -1,8 +1,9 @@
 import allure
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 
 @allure.epic('Zooplus testing')
+@allure.feature("Zooplus API testing")
 @allure.severity(allure.severity_level.TRIVIAL)
 def test_503_api_response(auth_page_zooplus, mock_backend_error):
     """Verify 503 API response code is handled correctly"""
@@ -17,6 +18,7 @@ def test_503_api_response(auth_page_zooplus, mock_backend_error):
 
 
 @allure.epic('Zooplus testing')
+@allure.feature("Zooplus API testing")
 @allure.severity(allure.severity_level.TRIVIAL)
 def test_500_api_response(auth_page_zooplus, mock_backend_error):
     """Verify 500 API response code is handled correctly"""

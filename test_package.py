@@ -17,7 +17,7 @@ def test_package_structure():
         'pytest.ini',
         '.env',
         'pages/product_page.py',
-        'tests_playwright/test_example.py'
+        'tests_playwright_examples/test_example.py'
     ]
 
     missing_files = []

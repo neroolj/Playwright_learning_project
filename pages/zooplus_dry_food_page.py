@@ -147,8 +147,3 @@ class ZooplusDryFoodPage:
     def sort_by_price_high_to_low(self):
         """Selects sorting by price from high to low"""
         self._select_sorting_option("highest-price")
-
-
-    def go_to_page(self, page: int) -> None:
-        """Uses pagination to navigate to exact page"""
-        pass
