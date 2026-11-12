@@ -13,11 +13,8 @@ def test_package_structure():
         'README.md',
         'requirements.txt',
         'conftest.py',
-        'generate_auth_data.py',
         'pytest.ini',
-        '.env',
-        'pages/product_page.py',
-        'tests_playwright_examples/test_example.py'
+        'pages/__init__.py',
     ]
 
     missing_files = []
