@@ -16,7 +16,7 @@ def test_bonuses_widget_is_visible(zooplus_homepage_pom):
     """Bonuses element is visible on homepage"""
     page = zooplus_homepage_pom
     with allure.step('Navigate to homepage'):
-        page.open_home_page()
+        page.open()
     with allure.step('Check if bonuses widget is shown on homepage'):
         expect(page.bonus_balance).to_be_visible()
 

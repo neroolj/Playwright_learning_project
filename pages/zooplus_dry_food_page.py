@@ -3,7 +3,7 @@ from config import zooplus_config
 from playwright.sync_api import Page, expect, Locator, TimeoutError as PlaywrightTimeoutError
 
 class ZooplusDryFoodPage:
-    """Zooplus dogs dry food page"""
+    """POM for zooplus dogs dry food page"""
 
     def __init__(self, page: Page):
         self.page = page
