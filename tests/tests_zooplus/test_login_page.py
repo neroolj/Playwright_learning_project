@@ -16,4 +16,38 @@ def test_login_tab_opens_by_default(zooplus_loginpage_pom, zooplus_homepage_pom)
         expect(page.register_tab).to_have_attribute('class', 'tab-item')
 
 
+@allure.epic('Zooplus')
+@allure.feature('Zooplus login page')
+@allure.severity(allure.severity_level.BLOCKER)
+def test_important_element_on_login_tab(zooplus_opened_loginpage) -> None:
+    """Verify that important elements are visible on login tab"""
+    page = zooplus_opened_loginpage
+    with allure.step('Verify that important elements are visible on login tab'):
+        expect(page.header).to_have_text('Existerande kund')
+        expect(page.email_field).to_be_visible()
+        expect(page.pass_field).to_be_visible()
+        expect(page.login_button).to_be_visible()
+        expect(page.forgot_pass).to_be_visible()
 
+
+@allure.epic('Zooplus')
+@allure.feature('Zooplus login page')
+@allure.severity(allure.severity_level.BLOCKER)
+def test_register_tab_opens(zooplus_opened_loginpage) -> None:
+    """Verify that register tab can be opened"""
+    page = zooplus_opened_loginpage
+    with allure.step('Switch to register tab'):
+        page.register_tab.click()
+    with allure.step('Verify that register tab is opened'):
+        expect(page.register_tab).to_have_attribute('class', 'tab-item-active')
+
+
+@allure.epic('Zooplus')
+@allure.feature('Zooplus login page')
+@allure.severity(allure.severity_level.CRITICAL)
+def test_forgot_pass_button(zooplus_opened_loginpage) -> None:
+    page = zooplus_opened_loginpage
+    with allure.step('Click on forgot password button'):
+        page.forgot_pass.click()
+    with allure.step('Verify redirection'):
+        page.verify_url('/login-actions/reset-credentials')

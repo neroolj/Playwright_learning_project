@@ -60,20 +60,27 @@ def auth_page_zooplus(auth_context_zooplus : BrowserContext):
 
 @pytest.fixture()
 def zooplus_homepage_pom(page: Page) -> ZooplusHomePage:
-    """Fixture creates Zooplus HomePage"""
+    """Fixture creates Zooplus HomePage instance"""
     item = ZooplusHomePage(page)
     return item
 
 
 @pytest.fixture()
 def zooplus_loginpage_pom(page: Page) -> ZooplusLoginPage:
-    """Fixture creates Zooplus LoginPage"""
+    """Fixture creates Zooplus LoginPage instance"""
     item = ZooplusLoginPage(page)
+    return item
+
+@pytest.fixture()
+def zooplus_opened_loginpage(page: Page, zooplus_homepage_pom) -> ZooplusLoginPage:
+    """Fixture creates opened Zooplus LoginPage instance"""
+    item = ZooplusLoginPage(page)
+    item.open(zooplus_homepage_pom)
     return item
 
 
 @pytest.fixture()
 def zooplus_dryfoodpage_pom(page: Page) -> ZooplusDryFoodPage:
-    """Fixture creates Zooplus Dry Food page"""
+    """Fixture creates Zooplus Dry Food page instance"""
     item = ZooplusDryFoodPage(page)
     return item
