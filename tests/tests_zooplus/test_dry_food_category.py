@@ -21,7 +21,7 @@ def test_products_page_important_elements(zooplus_dryfoodpage_pom) -> None:
     with allure.step("Verify that search box is visible"):
         expect(page.searchbox).to_be_visible()
     with allure.step("Verify that the most important filters are visible"):
-        for f in page.FILTERS:
+        for f in page.filters:
             expect(page.filter_button(f)).to_be_visible()
     with allure.step("Verify that widget with product cards is visible"):
         expect(page.products_grid).to_be_visible()

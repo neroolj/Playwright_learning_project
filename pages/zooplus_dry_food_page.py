@@ -4,11 +4,11 @@ from playwright.sync_api import Page, expect, Locator, TimeoutError as Playwrigh
 
 class ZooplusDryFoodPage:
     """Zooplus dogs dry food page"""
-    URL = f"{zooplus_config.current_url}shop/hund/hundmat_torrfoder"
-    FILTERS = zooplus_config.current_filters
 
     def __init__(self, page: Page):
         self.page = page
+        self.url = f"{zooplus_config.current_url}shop/hund/hundmat_torrfoder"
+        self.filters = zooplus_config.current_filters
         self.heading = self.page.get_by_text("Hundfoder: torrfoder för hundar")
         self.products_grid = self.page.locator('[data-zta=product-grid-wrapper]')
         self.breadcrumbs = self.page.get_by_role("navigation", name="breadcrumbs")
@@ -25,7 +25,7 @@ class ZooplusDryFoodPage:
 
     def open(self):
         """Opens the page and accepts cookies if needed"""
-        self.page.goto(self.URL)
+        self.page.goto(self.url)
         cookie_button = self.page.get_by_role("button", name="Endast nödvändiga kakor")
         try:
             # Wait for cookie_button to be visible

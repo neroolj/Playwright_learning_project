@@ -10,8 +10,8 @@ import os
 class ZooplusConfig:
     """Class contains configuration for Zooplus URLs"""
     PROD_URL = "https://www.zooplus.se/"
-    STAGE_URL = "https://https://www.stage.zooplus.se/.zoom.com"
-    DEV_URL = "https://https://www.dev.zooplus.se/.zoom.com"
+    STAGE_URL = "https://https://www.stage.zooplus.se/"
+    DEV_URL = "https://https://www.dev.zooplus.se/"
 
     PROD_FILTERS = ['Märke', 'Hundstorlek', 'Smak', 'Pris', 'Hundens ålder', 'Specialfoder för hund']
     STAGE_FILTERS = ['Märke', 'Hundstorlek', 'Smak', 'Pris']
