@@ -3,6 +3,7 @@
 import pytest
 import allure
 import time
+import os
 from rich import print
 
 
@@ -21,6 +22,19 @@ def pytest_addoption(parser):
         action='store_true',
         help='Adds execution time into output. Works only with --capture=no (-s)'
     )
+    parser.addoption(
+        '--env',
+        action='store',
+        default='prod',
+        choices=['dev', 'stage', 'prod'],
+        help='Set environment to run tests against: dev, stage, prod. Default value is prod'
+    )
+
+
+def pytest_configure(config):
+    """Save selected --env value into environment variable to use it for right URL selection"""
+    os.environ['TEST_ENV'] = config.getoption('--env')
+
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):

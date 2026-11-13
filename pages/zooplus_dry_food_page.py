@@ -1,10 +1,11 @@
 import re
+from config import zooplus_config
 from playwright.sync_api import Page, expect, Locator, TimeoutError as PlaywrightTimeoutError
 
 class ZooplusDryFoodPage:
     """Zooplus dogs dry food page"""
-    URL = "https://www.zooplus.se/shop/hund/hundmat_torrfoder"
-    FILTERS = ['Märke', 'Hundstorlek', 'Smak', 'Pris', 'Hundens ålder', 'Specialfoder för hund']
+    URL = f"{zooplus_config.current_url}shop/hund/hundmat_torrfoder"
+    FILTERS = zooplus_config.current_filters
 
     def __init__(self, page: Page):
         self.page = page

@@ -1,4 +1,4 @@
-"""Shader fixtures for all tests"""
+"""Shared fixtures for all tests"""
 
 import pytest
 from playwright.sync_api import Page
@@ -47,5 +47,5 @@ def compare_images():
 
         diff_percent = (diff_pixels / total_pixels) * 100
 
-        return True if diff_percent <= 100 - percentage else False
+        return diff_percent <= (100 - percentage)
     return _compare
