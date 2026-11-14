@@ -3,6 +3,7 @@
 import pytest
 import allure
 import time
+import sys
 import os
 from rich import print
 
@@ -34,6 +35,15 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     """Save selected --env value into environment variable to use it for right URL selection"""
     os.environ['TEST_ENV'] = config.getoption('--env')
+
+
+def pytest_report_header(config):
+    mode = 'screenshot generation' if config.getoption('--gen-screenshots') else 'test'
+    return [
+        f'environment: {config.getoption('--env')}',
+        f'mode: {mode}',
+        f'timestamp: {time.strftime('%d %b %X', time.localtime())}',
+    ]
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

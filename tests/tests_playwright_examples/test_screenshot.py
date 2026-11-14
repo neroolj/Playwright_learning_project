@@ -33,6 +33,7 @@ def test_screenshot(page: Page):
         assert os.path.exists(f"{screenshots_dir}last.png")
 
 
+@pytest.mark.visual
 @allure.epic("Basic examples")
 @allure.feature("Screenshots")
 def test_homepage_visual(page: Page, request, compare_images):
@@ -63,6 +64,7 @@ def test_homepage_visual(page: Page, request, compare_images):
             assert compare_images(etalon_path, current_path) is True, "Visual discrepancies detected"
 
 
+@pytest.mark.visual
 @allure.epic("Basic examples")
 @allure.feature("Screenshots")
 @pytest.mark.parametrize('img_name, locator',
