@@ -3,7 +3,6 @@
 import pytest
 import allure
 import time
-import sys
 import os
 from rich import print
 
@@ -38,12 +37,31 @@ def pytest_configure(config):
 
 
 def pytest_report_header(config):
+    """Adds some additional info into pytest header"""
     mode = 'screenshot generation' if config.getoption('--gen-screenshots') else 'test'
     return [
         f'environment: {config.getoption('--env')}',
         f'mode: {mode}',
         f'timestamp: {time.strftime('%d %b %X', time.localtime())}',
     ]
+
+
+def pytest_collection_modifyitems(config, items):
+    """Manages tests and leaves only tests marked with 'visual'
+    in case if pytest is started in screenshot generation mode"""
+    if config.getoption("--gen-screenshots"):
+        selected = []
+        deselected = []
+
+        for item in items:
+            if item.get_closest_marker("visual"):
+                selected.append(item)
+            else:
+                deselected.append(item)
+
+        items[:] = selected
+        config.hook.pytest_deselected(items=deselected)
+
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

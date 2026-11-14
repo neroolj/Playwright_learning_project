@@ -7,6 +7,7 @@ import allure
 screenshots_dir = 'screenshots/'
 
 
+@pytest.mark.visual
 @allure.epic("Basic examples")
 @allure.feature("Screenshots")
 def test_screenshot(page: Page):
