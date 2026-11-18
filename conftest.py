@@ -5,6 +5,8 @@ import allure
 import time
 import os
 from rich import print
+from playwright.sync_api import Page
+from config import timestamp_format
 
 
 def pytest_addoption(parser):
@@ -63,10 +65,65 @@ def pytest_collection_modifyitems(config, items):
         config.hook.pytest_deselected(items=deselected)
 
 
+@pytest.hookimpl(hookwrapper=True)
+def pytest_fixture_setup(fixturedef, request):
+    """Record diagnostics for every Page returned by a test fixture."""
+    # Let pytest create the fixture before inspecting its returned value
+    outcome = yield
+
+    # Stop hook execution if fixture has failed
+    if outcome.excinfo is not None:
+        return
+
+    # save fixture result
+    page = outcome.get_result()
+
+    # Check if fixture result is page object
+    if isinstance(page, Page):
+        # Install listeners once per page, even if multiple fixtures return it
+        if not hasattr(page, '_console_errors'):
+            page._console_errors = []
+            page._failed_requests = []
+
+            # Start browser console listener which saves errors into _console_errors
+            page.on('console',
+                lambda msg: page._console_errors.append(
+                    f'[{time.strftime(timestamp_format, time.localtime())}] '
+                    f'[{msg.type}]: {msg.text}'
+                ) if msg.type == 'error' else None
+            )
+
+            # Start listener which saves HTTP error responses (HTTP code 400 or higher)
+            page.on(
+                'response',
+                lambda resp: page._failed_requests.append(
+                    f'[{time.strftime(timestamp_format, time.localtime())}] '
+                    f'METHOD: {resp.request.method} | URL: {resp.url} '
+                    f'| STATUS: {resp.status}\n'
+                ) if resp.status >= 400 else None
+            )
+
+            # Start listener which saves HTTP requests that fail at transport level
+            page.on(
+                'requestfailed',
+                lambda req: page._failed_requests.append(
+                    f'[{time.strftime(timestamp_format, time.localtime())}] '
+                    f'METHOD: {req.method} | URL: {req.url} '
+                    f'| ERROR: {req.failure}\n'
+                )
+            )
+
+        # Save each unique page so the pytest_runtest_makereport hook can attach its logs on failure.
+        pages = getattr(request.node, '_diagnostic_pages', [])
+        if all(existing_page is not page for existing_page in pages):
+            pages.append(page)
+        request.node._diagnostic_pages = pages
+
+
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """This hook collects screenshot and attach it to Allure report if test failed"""""
+    """Collect and attach logs and screenshot to Allure report if test failed"""""
 
     # save test result which is sent by Pytest via .send() method
     outcome = yield
@@ -77,16 +134,36 @@ def pytest_runtest_makereport(item, call):
     # check if we are on executing stage and test failed
     if report.when == "call" and report.failed:
 
-        # save current page element depending on which fixture is used
-        page = item.funcargs.get('page') or item.funcargs.get('auth_page_test') or item.funcargs.get('auth_page_zooplus')
+        # Include pages returned by fixtures (including custom auth fixtures).
+        pages = list(getattr(item, '_diagnostic_pages', []))
+        for fixture_name in ('page', 'auth_page_test', 'auth_page_zooplus'):
+            candidate = item.funcargs.get(fixture_name)
+            if isinstance(candidate, Page) and all(candidate is not p for p in pages):
+                pages.append(candidate)
 
-        # if page exists collect screenshot and attach it to Allure report
-        if page:
+        # Attach screenshot and collected browser diagnostics for each page.
+        for index, page in enumerate(pages, start=1):
             allure.attach(
                 page.screenshot(full_page=True),
-                name="Screenshot",
+                name="Screenshot" if index == 1 else f"Screenshot ({index})",
                 attachment_type=allure.attachment_type.PNG
             )
+
+            console_errors = getattr(page, '_console_errors', [])
+            if console_errors:
+                allure.attach(
+                    '\n'.join(console_errors),
+                    name=f"Browser console errors ({index})",
+                    attachment_type=allure.attachment_type.TEXT
+                )
+
+            failed_requests = getattr(page, '_failed_requests', [])
+            if failed_requests:
+                allure.attach(
+                    '\n'.join(failed_requests),
+                    name=f"Failed API requests ({index})",
+                    attachment_type=allure.attachment_type.TEXT
+                )
 
 
 @pytest.fixture(autouse=True)
@@ -112,6 +189,6 @@ def time_session_scope(pytestconfig):
         delta = now - start
         print(f'\n[yellow]{'-'*30}[/yellow]')
         print(f'[yellow]Total duration[/yellow] : {delta:0.3} seconds')
-        print(f"[yellow]Started[/yellow] : {time.strftime('%d %b %X', time.localtime(start))}")
-        print(f"[yellow]Finished[/yellow] : {time.strftime('%d %b %X', time.localtime(now))}")
+        print(f"[yellow]Started[/yellow] : {time.strftime(timestamp_format, time.localtime(start))}")
+        print(f"[yellow]Finished[/yellow] : {time.strftime(timestamp_format, time.localtime(now))}")
         print(f'[yellow]{'-'*30}[/yellow]')
