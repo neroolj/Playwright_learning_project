@@ -1,6 +1,7 @@
 """Shared fixtures for all tests"""
 
 import pytest
+import time
 from playwright.sync_api import Page
 from PIL import Image, ImageChops
 
@@ -30,9 +31,9 @@ def mock_backend_error():
 def modify_backend_response():
     """Fixture catches real response from backend and modifies it before sending to client"""
 
-    def _mock(page: Page, api: str, modifier_function):
+    def _mock(page: Page, api: str, modifier_function, delay_ms: int=0):
         """Nested function which fetches response, modifies it with provided modifier_function,
-        and then sends it to client"""
+        and then sends it to client."""
         def handle_route(route):
             """Handler for route() call"""
             # 1. Perform request and catch response
@@ -52,6 +53,17 @@ def modify_backend_response():
             route.fulfill(response=response, json=json_data)
 
         page.route(api, handle_route)
+    return _mock
+
+
+@pytest.fixture()
+def emulate_backend_delay():
+    """Fixture emulates delay in backend API response (in ms)"""
+    def _mock(page: Page, api: str, delay_ms: int):
+        def cause_delay(route):
+            time.sleep(delay_ms / 1000)
+            route.continue_()
+        page.route(api, cause_delay)
     return _mock
 
 

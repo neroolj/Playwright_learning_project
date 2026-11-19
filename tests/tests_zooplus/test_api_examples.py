@@ -2,7 +2,7 @@
 
 import allure
 import os
-from playwright.sync_api import expect
+from playwright.sync_api import expect, Page
 
 
 @allure.epic("Mock API fixture examples")
@@ -79,3 +79,33 @@ def test_500_api_response(auth_page_zooplus, mock_backend_error):
     with allure.step('Check that customer balance is not loaded'):
         bonus = auth_page_zooplus.get_by_test_id('balance-points-header-component')
         expect(bonus).to_have_count(0)
+
+
+@allure.epic("Mock API fixture examples")
+@allure.severity(allure.severity_level.TRIVIAL)
+def test_bonus_widget_delay(auth_page_zooplus, emulate_backend_delay):
+    """Example of usage 'emulate_backend_delay' fixture"""
+    with allure.step('Start mock watcher for API that shows customer balance'):
+        emulate_backend_delay(auth_page_zooplus, '**/customer/balance', 3000)
+    with allure.step('Go to the page to trigger API'):
+        auth_page_zooplus.goto("https://www.zooplus.se/account/overview")
+    with allure.step('Check that right after opening the page bonus widget is not visible'):
+        expect(auth_page_zooplus.get_by_test_id('balance-points-header-component')).to_have_count(0)
+    with allure.step('Wait 6 seconds and check that element has appeared'):
+        auth_page_zooplus.wait_for_timeout(6000)
+        expect(auth_page_zooplus.get_by_test_id('balance-points-header-component')).to_have_count(2)
+
+
+@allure.epic("Mock API fixture examples")
+@allure.severity(allure.severity_level.TRIVIAL)
+def test_product_list_delay(page: Page, emulate_backend_delay):
+    """One more example of usage 'emulate_backend_delay' fixture"""
+    with allure.step('Start mock watcher for API that loads list of products'):
+        emulate_backend_delay(page, 'https://api.demoblaze.com/entries', 3000)
+    with allure.step('Go to the page to trigger API'):
+        page.goto('https://demoblaze.com/')
+    with allure.step('Make sure that products are not shown right after opening the page'):
+        expect(page.locator('.card-block')).to_have_count(0)
+    with allure.step('Wait 6 seconds and check that products appeared'):
+        page.wait_for_timeout(6000)
+        expect(page.locator('.card-block')).to_have_count(9)
