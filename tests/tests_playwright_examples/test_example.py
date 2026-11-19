@@ -8,8 +8,6 @@ import allure
 def test_header(page: Page, browser_name, browser_channel):
     """Example of usage 'to_have_title' method"""
     page.goto("https://playwright.dev/")
-    print('\nBROWSER =', browser_name)
-    print('\nBROWSER CHANNEL =', browser_channel)
     expect(page).to_have_title(re.compile("Playwright"))
 
 @allure.epic("Basic examples")

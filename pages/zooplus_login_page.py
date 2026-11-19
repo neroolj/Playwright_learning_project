@@ -45,12 +45,15 @@ class ZooplusLoginPage:
 
 
     def register(self, name: str, surname: str, email: str, password: str):
+        """Register new account by provided data"""
         pass
 
 
     def check_url_redirection(self):
-        """Verifies that user is redirected to right URL after login"""
+        """Verifies that user is redirected to right URL after login
+        That proves that login was successful"""
         expect(self.page).to_have_url(f'{zooplus_config.current_url}account/overview')
+
 
     def verify_url(self, text) -> None:
         """Verify that given text exists in the url"""

@@ -1,6 +1,7 @@
 import pytest
 import allure
 from playwright.sync_api import expect
+from config import zooplus_config
 
 @allure.epic('Zooplus')
 @allure.feature('Zooplus login page')
@@ -73,3 +74,15 @@ def test_forgot_pass_button(zooplus_opened_loginpage) -> None:
         page.forgot_pass.click()
     with allure.step('Verify redirection'):
         page.verify_url('/login-actions/reset-credentials')
+
+
+@allure.epic('Zooplus')
+@allure.feature('Zooplus login page')
+@allure.severity(allure.severity_level.BLOCKER)
+def test_login_flow(zooplus_opened_loginpage) -> None:
+    """Testing login flow with correct credentials"""
+    page = zooplus_opened_loginpage
+    with allure.step('Fill login and password and press login button'):
+        page.login(zooplus_config.current_username, zooplus_config.current_password)
+    with allure.step('Verify that login was successful'):
+        page.check_url_redirection()

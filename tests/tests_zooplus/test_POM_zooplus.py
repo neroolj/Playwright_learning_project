@@ -19,17 +19,3 @@ def test_bonuses_widget_is_visible(zooplus_homepage_pom):
         page.open()
     with allure.step('Check if bonuses widget is shown on homepage'):
         expect(page.bonus_balance).to_be_visible()
-
-
-@allure.epic('Zooplus')
-@allure.severity(allure.severity_level.CRITICAL)
-def test_login_flow(zooplus_loginpage_pom, zooplus_homepage_pom):
-    """Testing login flow with correct credentials"""
-    homepage = zooplus_homepage_pom
-    page = zooplus_loginpage_pom
-    with allure.step("Navigate to login page"):
-        page.open_login_page(homepage)
-    with allure.step("Login"):
-        page.login(login, password)
-    with allure.step("Check URL redirection"):
-        page.check_url_redirection()
