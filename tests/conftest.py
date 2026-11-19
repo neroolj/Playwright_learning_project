@@ -27,6 +27,35 @@ def mock_backend_error():
 
 
 @pytest.fixture()
+def modify_backend_response():
+    """Fixture catches real response from backend and modifies it before sending to client"""
+
+    def _mock(page: Page, api: str, modifier_function):
+        """Nested function which fetches response, modifies it with provided modifier_function,
+        and then sends it to client"""
+        def handle_route(route):
+            """Handler for route() call"""
+            # 1. Perform request and catch response
+            response = route.fetch()
+            # 2. Try to parse response's json
+            try:
+                json_data = response.json()
+            except Exception:
+                # 3.1 If parsing failed send response to client without any modifications and stop handler execution
+                print('Could not parse response by built-in .json() method')
+                route.continue_()
+                return
+            # 3.2 If parsing succeeded apply modifier function to it.
+            modifier_function(json_data)
+
+            # 4. Send response to client with modified data
+            route.fulfill(response=response, json=json_data)
+
+        page.route(api, handle_route)
+    return _mock
+
+
+@pytest.fixture()
 def compare_images():
     """Fixture compares two images with specified accuracy"""
 
